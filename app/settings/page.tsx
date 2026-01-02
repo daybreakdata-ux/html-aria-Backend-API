@@ -13,235 +13,97 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, Save, Globe, Palette, Cpu, Settings, User, Monitor, Type, Droplet } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
-// Theme definitions
+// Theme definitions - 4 carefully curated themes with high contrast and visibility
 const themes = [
   {
     id: "ocean",
     name: "Ocean Blue",
-    description: "Calming blue tones inspired by the ocean",
+    description: "Professional blue with excellent readability",
     colors: {
       light: {
-        accent: "#208299",
-        userMessage: "#1e6b7a",
-        background: "#f8fafc",
+        accent: "#0284c7",
+        userMessage: "#0369a1",
+        background: "#f0f9ff",
         surface: "#ffffff",
-        text: "#1e293b",
-        muted: "#64748b"
+        text: "#0c4a6e",
+        muted: "#475569"
       },
       dark: {
-        accent: "#22d3ee",
-        userMessage: "#06b6d4",
-        background: "#0c1621",
+        accent: "#38bdf8",
+        userMessage: "#0ea5e9",
+        background: "#0c1821",
         surface: "#1e293b",
-        text: "#f1f5f9",
+        text: "#e0f2fe",
         muted: "#94a3b8"
       }
     }
   },
   {
-    id: "forest",
-    name: "Forest Green",
-    description: "Natural green palette for a fresh feel",
+    id: "emerald",
+    name: "Emerald Green",
+    description: "Fresh green with high contrast",
     colors: {
       light: {
         accent: "#059669",
         userMessage: "#047857",
         background: "#f0fdf4",
         surface: "#ffffff",
-        text: "#14532d",
-        muted: "#16a34a"
+        text: "#065f46",
+        muted: "#475569"
       },
       dark: {
         accent: "#34d399",
         userMessage: "#10b981",
-        background: "#0a1f14",
-        surface: "#14532d",
-        text: "#f0fdf4",
-        muted: "#86efac"
+        background: "#0a1810",
+        surface: "#1e293b",
+        text: "#d1fae5",
+        muted: "#94a3b8"
       }
     }
   },
   {
-    id: "sunset",
-    name: "Sunset Orange",
-    description: "Warm orange and pink tones",
-    colors: {
-      light: {
-        accent: "#ea580c",
-        userMessage: "#dc2626",
-        background: "#fff7ed",
-        surface: "#ffffff",
-        text: "#9a3412",
-        muted: "#fb923c"
-      },
-      dark: {
-        accent: "#fb923c",
-        userMessage: "#f97316",
-        background: "#1c0f05",
-        surface: "#7c2d12",
-        text: "#fff7ed",
-        muted: "#fdba74"
-      }
-    }
-  },
-  {
-    id: "midnight",
-    name: "Midnight Purple",
-    description: "Deep purple and blue for night owls",
+    id: "violet",
+    name: "Violet Purple",
+    description: "Rich purple with great visibility",
     colors: {
       light: {
         accent: "#7c3aed",
         userMessage: "#6d28d9",
         background: "#faf5ff",
         surface: "#ffffff",
-        text: "#581c87",
-        muted: "#a78bfa"
+        text: "#5b21b6",
+        muted: "#475569"
       },
       dark: {
         accent: "#a78bfa",
         userMessage: "#8b5cf6",
-        background: "#1e1134",
-        surface: "#581c87",
-        text: "#faf5ff",
-        muted: "#c4b5fd"
-      }
-    }
-  },
-  {
-    id: "rose",
-    name: "Rose Pink",
-    description: "Soft pink and rose tones",
-    colors: {
-      light: {
-        accent: "#db2777",
-        userMessage: "#be185d",
-        background: "#fdf2f8",
-        surface: "#ffffff",
-        text: "#831843",
-        muted: "#f472b6"
-      },
-      dark: {
-        accent: "#f472b6",
-        userMessage: "#ec4899",
-        background: "#1f0818",
-        surface: "#831843",
-        text: "#fdf2f8",
-        muted: "#f9a8d4"
-      }
-    }
-  },
-  {
-    id: "amber",
-    name: "Amber Gold",
-    description: "Warm gold and amber tones",
-    colors: {
-      light: {
-        accent: "#d97706",
-        userMessage: "#b45309",
-        background: "#fffbeb",
-        surface: "#ffffff",
-        text: "#92400e",
-        muted: "#f59e0b"
-      },
-      dark: {
-        accent: "#fbbf24",
-        userMessage: "#f59e0b",
-        background: "#1c1508",
-        surface: "#78350f",
-        text: "#fffbeb",
-        muted: "#fcd34d"
+        background: "#1a0f2e",
+        surface: "#1e293b",
+        text: "#ede9fe",
+        muted: "#94a3b8"
       }
     }
   },
   {
     id: "slate",
-    name: "Slate Gray",
-    description: "Modern gray and blue-gray palette",
+    name: "Neutral Slate",
+    description: "Elegant gray with perfect balance",
     colors: {
       light: {
-        accent: "#475569",
-        userMessage: "#334155",
+        accent: "#0f172a",
+        userMessage: "#1e293b",
         background: "#f8fafc",
         surface: "#ffffff",
-        text: "#1e293b",
+        text: "#334155",
         muted: "#64748b"
       },
       dark: {
-        accent: "#94a3b8",
-        userMessage: "#64748b",
+        accent: "#cbd5e1",
+        userMessage: "#94a3b8",
         background: "#0f172a",
         surface: "#1e293b",
-        text: "#f8fafc",
-        muted: "#cbd5e1"
-      }
-    }
-  },
-  {
-    id: "emerald",
-    name: "Emerald",
-    description: "Rich emerald and teal combination",
-    colors: {
-      light: {
-        accent: "#065f46",
-        userMessage: "#064e3b",
-        background: "#ecfdf5",
-        surface: "#ffffff",
-        text: "#022c22",
-        muted: "#10b981"
-      },
-      dark: {
-        accent: "#10b981",
-        userMessage: "#059669",
-        background: "#021810",
-        surface: "#064e3b",
-        text: "#ecfdf5",
-        muted: "#6ee7b7"
-      }
-    }
-  },
-  {
-    id: "indigo",
-    name: "Indigo",
-    description: "Deep indigo and navy blue",
-    colors: {
-      light: {
-        accent: "#312e81",
-        userMessage: "#1e1b4b",
-        background: "#eef2ff",
-        surface: "#ffffff",
-        text: "#1e1b4b",
-        muted: "#6366f1"
-      },
-      dark: {
-        accent: "#818cf8",
-        userMessage: "#6366f1",
-        background: "#0f0d29",
-        surface: "#312e81",
-        text: "#eef2ff",
-        muted: "#a5b4fc"
-      }
-    }
-  },
-  {
-    id: "coral",
-    name: "Coral",
-    description: "Vibrant coral and orange tones",
-    colors: {
-      light: {
-        accent: "#dc2626",
-        userMessage: "#b91c1c",
-        background: "#fef2f2",
-        surface: "#ffffff",
-        text: "#991b1b",
-        muted: "#f87171"
-      },
-      dark: {
-        accent: "#f87171",
-        userMessage: "#ef4444",
-        background: "#1a0606",
-        surface: "#7f1d1d",
-        text: "#fef2f2",
-        muted: "#fca5a5"
+        text: "#f1f5f9",
+        muted: "#94a3b8"
       }
     }
   }
@@ -532,35 +394,55 @@ export default function SettingsPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {themes.map((theme) => {
                           const themeColors = getThemeColors(theme)
                           return (
                             <div
                               key={theme.id}
                               onClick={() => handleThemeChange(theme.id)}
-                              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                              className={`p-6 rounded-xl border-2 cursor-pointer transition-all ${
                                 selectedTheme === theme.id
-                                  ? 'border-primary bg-primary/10 shadow-md ring-2 ring-primary/20'
-                                  : 'border-border hover:border-primary/50 hover:shadow-sm'
+                                  ? 'border-primary bg-primary/10 shadow-lg ring-2 ring-primary/30'
+                                  : 'border-border hover:border-primary/50 hover:shadow-md'
                               }`}
                             >
-                              <div className="flex items-center justify-between mb-3">
-                                <h3 className="font-semibold text-foreground">{theme.name}</h3>
+                              <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-bold text-foreground">{theme.name}</h3>
                                 {selectedTheme === theme.id && (
-                                  <div className="w-4 h-4 rounded-full bg-primary animate-pulse" />
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-semibold text-primary">Active</span>
+                                    <div className="w-3 h-3 rounded-full bg-primary animate-pulse" />
+                                  </div>
                                 )}
                               </div>
                               <div
-                                className="h-16 rounded-md mb-2 flex items-center justify-center text-white text-sm font-medium shadow-sm overflow-hidden relative"
+                                className="h-20 rounded-lg mb-3 flex items-center justify-center text-white text-base font-semibold shadow-md overflow-hidden relative"
                                 style={{ background: `linear-gradient(135deg, ${themeColors.accent}, ${themeColors.userMessage})` }}
                               >
-                                <span className="relative z-10 drop-shadow-md">Preview</span>
+                                <span className="relative z-10 drop-shadow-md">Color Preview</span>
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
                               </div>
-                              <p className="text-xs font-medium" style={{ color: isDarkMode ? '#a1a1aa' : '#71717a' }}>
+                              <p className="text-sm font-medium" style={{ color: isDarkMode ? '#a1a1aa' : '#71717a' }}>
                                 {theme.description}
                               </p>
+                              <div className="mt-3 flex gap-2">
+                                <div 
+                                  className="flex-1 h-8 rounded-md"
+                                  style={{ backgroundColor: themeColors.accent }}
+                                  title="Accent color"
+                                />
+                                <div 
+                                  className="flex-1 h-8 rounded-md"
+                                  style={{ backgroundColor: themeColors.text }}
+                                  title="Text color"
+                                />
+                                <div 
+                                  className="flex-1 h-8 rounded-md"
+                                  style={{ backgroundColor: themeColors.muted }}
+                                  title="Muted color"
+                                />
+                              </div>
                             </div>
                           )
                         })}
