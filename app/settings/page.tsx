@@ -305,10 +305,6 @@ export default function SettingsPage() {
   }, [])
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  useEffect(() => {
     if (!mounted) return
 
     // Load UI settings from localStorage
