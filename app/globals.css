@@ -43,19 +43,19 @@
   --light-brightness: 100%;
   --dark-brightness: 100%;
   --base-font-size: 16px;
-  --accent-color: #208299;
-  --user-message-color: #208299;
+  --accent-color: #3b82f6;
+  --user-message-color: #2563eb;
 
   /* Font customization */
   --menu-font-family: "Inter", sans-serif;
   --menu-font-size: 14px;
-  --menu-font-color: #1e293b;
+  --menu-font-color: #000000;
   --chat-font-family: "Inter", sans-serif;
   --chat-font-size: 14px;
-  --chat-font-color: #1e293b;
+  --chat-font-color: #000000;
   --system-font-family: "Inter", sans-serif;
   --system-font-size: 14px;
-  --system-font-color: #64748b;
+  --system-font-color: #374151;
   
   filter: brightness(var(--light-brightness));
 }
@@ -93,7 +93,16 @@
   --sidebar-accent-foreground: oklch(0.95 0 0);
   --sidebar-border: oklch(0.25 0.01 220);
   --sidebar-ring: oklch(0.55 0.18 220);
-  
+
+  /* Font colors for dark theme */
+  --menu-font-color: #ffffff;
+  --chat-font-color: #ffffff;
+  --system-font-color: #d1d5db;
+
+  /* Theme-specific colors */
+  --accent-color: #60a5fa;
+  --user-message-color: #60a5fa;
+
   filter: brightness(var(--dark-brightness));
 }
 
