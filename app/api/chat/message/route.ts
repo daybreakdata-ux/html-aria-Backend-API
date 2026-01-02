@@ -180,7 +180,9 @@ export async function POST(request: NextRequest) {
         })
 
         const response = result.response
-        return response.text() || null
+        const responseText = response.text()
+        console.log("Google Gemini response:", responseText)
+        return responseText || null
       } catch (error) {
         console.error("Google Gemini API error:", error)
         return null
@@ -191,6 +193,9 @@ export async function POST(request: NextRequest) {
     const openRouterApiKey = process.env.OPENROUTER_API_KEY
     let assistantContent: string | null = null
     let usedFallback = false
+
+    console.log('OpenRouter API key configured:', !!openRouterApiKey)
+    console.log('OpenRouter API key valid:', openRouterApiKey && openRouterApiKey !== "sk-or-v1-..." && !openRouterApiKey.includes("your_"))
 
     // Try OpenRouter first if API key is configured
     if (openRouterApiKey && openRouterApiKey !== "sk-or-v1-..." && !openRouterApiKey.includes("your_")) {
@@ -221,6 +226,10 @@ export async function POST(request: NextRequest) {
           if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) {
             assistantContent = aiData.choices[0].message.content || "No response received"
             console.log("OpenRouter API success")
+            console.log("API Response content:", assistantContent)
+            console.log("Full API response:", JSON.stringify(aiData, null, 2))
+          } else {
+            console.log("API Response missing choices/message:", JSON.stringify(aiData, null, 2))
           }
         } else {
           const errorText = await apiResponse.text()
@@ -252,7 +261,8 @@ export async function POST(request: NextRequest) {
 
     // If both APIs failed, return error
     if (!assistantContent) {
-      const errorMessage = "Unable to get AI response. Please contact the administrator."
+      console.log('Both OpenRouter and Google Gemini APIs failed')
+      const errorMessage = "Unable to get AI response. Please check that API keys are configured in environment variables."
       await sql`
         INSERT INTO messages (chat_id, user_id, role, content)
         VALUES (${chatId}, ${userId}, 'error', ${errorMessage})
