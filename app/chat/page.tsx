@@ -708,21 +708,21 @@ export default function ChatPage() {
       
       {/* Left Sidebar */}
       <div className={cn(
-        "fixed left-0 top-0 h-full w-80 bg-card border-r border-border z-50 transition-transform duration-300 flex flex-col",
+        "fixed left-0 top-0 h-full w-64 bg-card border-r border-border z-50 transition-transform duration-300 flex flex-col",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-border flex items-center justify-between">
-          <h2 className="font-semibold text-lg">
+        <div className="px-3 py-2 border-b border-border flex items-center justify-between">
+          <h2 className="font-semibold text-base">
             {sidebarView === "history" ? "Chat History" : "Modes"}
           </h2>
           <Button
             size="sm"
             variant="ghost"
             onClick={() => setSidebarOpen(false)}
-            className="h-8 w-8 p-0"
+            className="h-7 w-7 p-0"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </Button>
         </div>
 
@@ -772,14 +772,14 @@ export default function ChatPage() {
                       setSidebarOpen(false)
                     }}
                     className={cn(
-                      "w-full p-3 rounded-lg text-left transition-colors mb-1",
+                      "w-full p-2 rounded-md text-left transition-colors mb-1 group",
                       activeChat === chat.id
-                        ? "bg-accent/50"
-                        : "hover:bg-muted"
+                        ? "bg-accent/30"
+                        : "hover:bg-muted/60"
                     )}
                   >
-                    <div className="font-medium text-sm truncate">{chat.title}</div>
-                    <div className="text-xs text-muted-foreground mt-1">
+                    <div className="font-medium text-sm truncate group-hover:text-accent transition-colors">{chat.title}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
                       {chat.messages.length} messages
                     </div>
                   </button>
@@ -787,36 +787,36 @@ export default function ChatPage() {
               )}
             </div>
           ) : (
-            <div className="p-2">
+            <div className="p-2 space-y-2">
               {modes.map((mode) => (
                 <button
                   key={mode.id}
                   onClick={() => handleModeSelect(mode.id)}
                   className={cn(
-                    "w-full p-4 rounded-xl text-left transition-all duration-200 mb-2 border-2 group",
+                    "w-full p-3 rounded-lg text-left transition-all duration-200 border group",
                     selectedMode === mode.id
-                      ? "bg-gradient-to-r from-accent/20 to-accent/10 border-accent shadow-lg transform scale-[1.02]"
-                      : "border-border/50 hover:border-accent/50 hover:bg-muted/50 hover:shadow-md"
+                      ? "bg-gradient-to-r from-accent/15 to-accent/8 border-accent shadow-md transform scale-[1.01]"
+                      : "border-border/40 hover:border-accent/40 hover:bg-muted/40 hover:shadow-sm"
                   )}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className={cn(
-                        "font-bold text-base transition-colors",
+                        "font-semibold text-sm transition-colors truncate",
                         selectedMode === mode.id ? "text-foreground" : "text-foreground group-hover:text-accent"
                       )}>
                         {mode.name}
                       </div>
                       <div className={cn(
-                        "text-xs mt-1 transition-colors",
-                        selectedMode === mode.id ? "text-foreground/80" : "text-muted-foreground group-hover:text-foreground/80"
+                        "text-xs mt-0.5 transition-colors leading-tight",
+                        selectedMode === mode.id ? "text-foreground/70" : "text-muted-foreground group-hover:text-foreground/70"
                       )}>
                         {mode.description}
                       </div>
                     </div>
                     {selectedMode === mode.id && (
-                      <div className="ml-3">
-                        <div className="w-3 h-3 rounded-full bg-accent animate-pulse" />
+                      <div className="ml-2 flex-shrink-0">
+                        <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
                       </div>
                     )}
                   </div>
@@ -827,24 +827,26 @@ export default function ChatPage() {
         </ScrollArea>
 
         {/* Sidebar Footer with Settings and Sign Out */}
-        <div className="p-4 border-t border-border space-y-2">
+        <div className="px-3 py-2 border-t border-border space-y-1">
           <Button
+            size="sm"
             variant="ghost"
             onClick={() => {
               router.push("/settings")
               setSidebarOpen(false)
             }}
-            className="w-full justify-start"
+            className="w-full justify-start h-8 text-sm"
           >
-            <Settings className="w-4 h-4 mr-2" />
+            <Settings className="w-3.5 h-3.5 mr-2" />
             Settings
           </Button>
           <Button
+            size="sm"
             variant="ghost"
             onClick={() => signOut({ callbackUrl: '/' })}
-            className="w-full justify-start"
+            className="w-full justify-start h-8 text-sm"
           >
-            <LogOut className="w-4 h-4 mr-2" />
+            <LogOut className="w-3.5 h-3.5 mr-2" />
             <span>Sign Out</span>
           </Button>
           <p className="text-xs text-muted-foreground text-center mt-1">sign-out</p>
@@ -862,38 +864,38 @@ export default function ChatPage() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Fixed Header */}
-        <header className="flex-shrink-0 p-3 sm:p-4 border-b border-border/50 bg-card/95 backdrop-blur-xl flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3">
+        <header className="flex-shrink-0 px-4 py-3 border-b border-border/50 bg-card/95 backdrop-blur-xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <Button
               size="sm"
               variant="ghost"
               onClick={() => setSidebarOpen(true)}
-              className="h-9 w-9 sm:h-10 sm:w-10 p-0"
+              className="h-9 w-9 p-0 hover:bg-accent/10"
             >
               <Menu className="w-5 h-5" />
             </Button>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg" style={{ background: `linear-gradient(to bottom right, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
-                <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center shadow-md" style={{ background: `linear-gradient(to bottom right, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
+                <Globe className="w-4.5 h-4.5 text-white" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="font-bold text-base sm:text-lg">ARIA</h1>
-                  <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-accent/20 to-accent/10 text-foreground font-bold border border-accent/30 shadow-sm">
+                  <h1 className="font-bold text-lg tracking-tight">ARIA</h1>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-gradient-to-r from-accent/20 to-accent/10 text-foreground font-semibold border border-accent/30 shadow-sm">
                     {getActiveMode().name}
                   </span>
                 </div>
-                <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">
+                <p className="text-xs text-muted-foreground leading-tight">
                   AI Assistant with Real-Time Web Access
                 </p>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button size="sm" variant="ghost" onClick={createNewChat} className="h-9 sm:h-10 px-2 sm:px-3">
-            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-          </Button>
+            <Button size="sm" variant="ghost" onClick={createNewChat} className="h-9 px-3 hover:bg-accent/10">
+              <Plus className="w-4 h-4" />
+            </Button>
           </div>
         </header>
 
@@ -902,12 +904,12 @@ export default function ChatPage() {
           <div className="p-3 sm:p-4 md:p-6 pb-32">
             <div className="mx-auto space-y-4 sm:space-y-6" style={{ maxWidth: 'var(--chat-width, 800px)' }}>
               {currentChat?.messages.length === 0 && (
-              <div className="text-center py-8 sm:py-12">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg" style={{ background: `linear-gradient(to bottom right, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
-                  <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+              <div className="text-center py-12 sm:py-16">
+                <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg" style={{ background: `linear-gradient(to bottom right, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
+                  <Globe className="w-7 h-7 sm:w-9 sm:h-9 text-white" />
                 </div>
-                <h2 className="text-lg sm:text-2xl font-bold mb-2 text-balance">How can I help you today?</h2>
-                <p className="text-muted-foreground text-xs sm:text-sm text-pretty px-4">
+                <h2 className="text-xl sm:text-3xl font-bold mb-3 text-balance">How can I help you today?</h2>
+                <p className="text-muted-foreground text-sm sm:text-base text-pretty px-6 max-w-md mx-auto leading-relaxed">
                   Ask me anything - I'll automatically search the web for real-time information when needed
                 </p>
               </div>
@@ -917,23 +919,26 @@ export default function ChatPage() {
               <div
                 key={msg.id}
                 className={cn(
-                  "flex gap-2 sm:gap-4 animate-in slide-in-from-bottom-2 duration-300",
+                  "flex gap-3 sm:gap-4 animate-in slide-in-from-bottom-2 duration-300",
                   msg.role === "user" ? "justify-end" : "justify-start",
                 )}
               >
                 {msg.role === "assistant" && (
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-1 shadow-md" style={{ background: `linear-gradient(to bottom right, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
-                    <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 shadow-md" style={{ background: `linear-gradient(to bottom right, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
+                    <Globe className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white" />
                   </div>
                 )}
                 <div
                   className={cn(
-                    "max-w-[85%] rounded-xl sm:rounded-2xl group overflow-hidden",
-                    msg.role === "user" && "text-white p-3 sm:p-4 shadow-md break-words",
-                    msg.role === "assistant" && "bg-muted/50 p-3 sm:p-4",
+                    "max-w-[85%] rounded-xl sm:rounded-2xl group overflow-hidden shadow-sm",
+                    msg.role === "user" && "text-white p-3 sm:p-4 break-words",
+                    msg.role === "assistant" && "bg-card border border-border/50 p-3 sm:p-4",
                     msg.role === "error" && "bg-destructive/10 text-destructive p-3 sm:p-4 border border-destructive/20",
                   )}
-                  style={msg.role === "user" ? { backgroundColor: 'var(--user-message-color)' } : undefined}
+                  style={msg.role === "user" ? {
+                    background: `linear-gradient(to bottom right, var(--user-message-color), color-mix(in srgb, var(--user-message-color) 90%, black))`,
+                    boxShadow: '0 4px 12px color-mix(in srgb, var(--user-message-color) 30%, transparent)'
+                  } : undefined}
                 >
                   {msg.role === "assistant" ? (
                     <div className="text-sm break-words overflow-hidden">
@@ -1042,7 +1047,7 @@ export default function ChatPage() {
                   )}
                 </div>
                 {msg.role === "user" && (
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-1" style={{ backgroundColor: 'color-mix(in srgb, var(--user-message-color) 20%, transparent)' }}>
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 shadow-md" style={{ backgroundColor: 'color-mix(in srgb, var(--user-message-color) 20%, transparent)', border: '1px solid color-mix(in srgb, var(--user-message-color) 30%, transparent)' }}>
                     <span className="text-[10px] sm:text-xs font-semibold" style={{ color: 'var(--user-message-color)' }}>You</span>
                   </div>
                 )}
@@ -1087,7 +1092,7 @@ export default function ChatPage() {
         </ScrollArea>
 
         {/* Input Area */}
-        <div className="flex-shrink-0 p-3 sm:p-4 border-t border-border/50 bg-card/95 backdrop-blur-xl pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:pb-[env(safe-area-inset-bottom)]">
+        <div className="flex-shrink-0 px-4 py-3 border-t border-border/50 bg-card/95 backdrop-blur-xl pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:pb-[env(safe-area-inset-bottom)]">
           <div className="mx-auto" style={{ maxWidth: 'var(--chat-width, 800px)' }}>
           {uploadedFile && (
             <div className="mb-2 p-2 bg-muted/50 rounded-lg flex items-center justify-between text-xs">

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const userId = parseInt(session.user.id)
     const sql = getSql()
 
-    // Get all chats for the user
+    // Get all chats for the user with at least one message
     const chats = await sql`
       SELECT
         c.id,
@@ -34,9 +34,10 @@ export async function GET(request: NextRequest) {
         COUNT(m.id) as message_count,
         MAX(m.created_at) as last_message_time
       FROM chats c
-      LEFT JOIN messages m ON c.id = m.chat_id
+      INNER JOIN messages m ON c.id = m.chat_id
       WHERE c.user_id = ${userId}
       GROUP BY c.id, c.title, c.created_at, c.updated_at, c.last_message_at
+      HAVING COUNT(m.id) > 0
       ORDER BY c.last_message_at DESC, c.created_at DESC
     `
 
