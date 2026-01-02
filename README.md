@@ -76,6 +76,9 @@ SERPAPI_KEY=your_serpapi_key_here
 
 # Required: OpenRouter API key (server-side only, not user-configurable)
 OPENROUTER_API_KEY="sk-or-v1-..."
+
+# Optional: Google Gemini API key (server-side only, used as fallback when OpenRouter fails)
+GOOGLE_API_KEY="your_google_api_key_here"
 ```
 
 5. Run the development server:

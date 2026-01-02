@@ -17,8 +17,7 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { performWebSearch } from "@/app/actions/web-search"
 
-const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
-const SECONDARY_MODEL = "gemma-2.5-flash";
+// Note: Google API key is now server-side only (GOOGLE_API_KEY in environment variables)
 
 interface Message {
   id: string

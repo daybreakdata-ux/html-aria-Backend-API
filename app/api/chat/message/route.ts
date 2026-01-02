@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getSql } from '@/lib/db'
 import { performWebSearch } from '@/app/actions/web-search'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 interface WebSearchResult {
   title: string
@@ -132,94 +133,129 @@ export async function POST(request: NextRequest) {
       content: currentMessageContent,
     })
 
-    // Get API key from environment variable only (server-side, not user-configurable)
-    const finalApiKey = process.env.OPENROUTER_API_KEY
-    if (!finalApiKey || finalApiKey === "sk-or-v1-..." || finalApiKey.includes("your_")) {
-      await sql`
-        INSERT INTO messages (chat_id, user_id, role, content)
-        VALUES (${chatId}, ${userId}, 'error', ${'API key not configured. Please contact the administrator.'})
-      `
-      return NextResponse.json(
-        { error: 'API key not configured. Please contact the administrator.' },
-        { status: 500 }
-      )
+    // Helper function to call Google Gemini API as fallback
+    const callGoogleGemini = async (): Promise<string | null> => {
+      const geminiApiKey = process.env.GOOGLE_API_KEY
+      if (!geminiApiKey || geminiApiKey.includes("your_") || geminiApiKey === "") {
+        console.log("Google Gemini API key not configured, skipping fallback")
+        return null
+      }
+
+      try {
+        const genAI = new GoogleGenerativeAI(geminiApiKey)
+        const geminiModel = genAI.getGenerativeModel({ 
+          model: "gemini-2.0-flash-exp",
+        })
+
+        // Build the prompt with system instruction and conversation history
+        let fullPrompt = ""
+        if (systemPrompt) {
+          fullPrompt += `System Instructions: ${systemPrompt}\n\n`
+        }
+        
+        // Add conversation history
+        for (const msg of messages) {
+          if (msg.role === 'system') continue
+          const roleLabel = msg.role === 'assistant' ? 'Assistant' : 'User'
+          fullPrompt += `${roleLabel}: ${msg.content}\n\n`
+        }
+
+        const result = await geminiModel.generateContent({
+          contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
+          generationConfig: {
+            temperature: temperature || 0.7,
+            maxOutputTokens: maxTokens || 2000,
+            topP: topP || 1,
+          },
+        })
+
+        const response = result.response
+        return response.text() || null
+      } catch (error) {
+        console.error("Google Gemini API error:", error)
+        return null
+      }
     }
 
-    console.log('Sending messages to AI API:', messages.length, 'messages')
+    // Get API key from environment variable only (server-side, not user-configurable)
+    const openRouterApiKey = process.env.OPENROUTER_API_KEY
+    let assistantContent: string | null = null
+    let usedFallback = false
 
-    // Make API call to OpenRouter
-    const apiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${finalApiKey}`,
-      },
-      body: JSON.stringify({
-        model: model || "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
-        messages,
-        temperature: temperature || 0.7,
-        max_tokens: maxTokens || 2000,
-        top_p: topP || 1,
-        frequency_penalty: frequencyPenalty || 0,
-        presence_penalty: presencePenalty || 0,
-      }),
-    })
+    // Try OpenRouter first if API key is configured
+    if (openRouterApiKey && openRouterApiKey !== "sk-or-v1-..." && !openRouterApiKey.includes("your_")) {
+      console.log('Sending messages to OpenRouter API:', messages.length, 'messages')
 
-    if (!apiResponse.ok) {
-      const errorText = await apiResponse.text()
-      let errorMessage = `Failed to get AI response`
-      
       try {
-        const errorData = JSON.parse(errorText)
-        if (errorData.error?.message) {
-          errorMessage = errorData.error.message
-        } else if (errorData.error) {
-          errorMessage = String(errorData.error)
+        // Make API call to OpenRouter
+        const apiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${openRouterApiKey}`,
+          },
+          body: JSON.stringify({
+            model: model || "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+            messages,
+            temperature: temperature || 0.7,
+            max_tokens: maxTokens || 2000,
+            top_p: topP || 1,
+            frequency_penalty: frequencyPenalty || 0,
+            presence_penalty: presencePenalty || 0,
+          }),
+        })
+
+        if (apiResponse.ok) {
+          const aiData = await apiResponse.json()
+
+          if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) {
+            assistantContent = aiData.choices[0].message.content || "No response received"
+            console.log("OpenRouter API success")
+          }
+        } else {
+          const errorText = await apiResponse.text()
+          console.error("OpenRouter API Error:", apiResponse.status, errorText)
+          
+          // If it's a client error (4xx), don't fallback (likely invalid request)
+          // Only fallback on server errors (5xx) or rate limits (429)
+          if (apiResponse.status >= 500 || apiResponse.status === 429) {
+            console.log("OpenRouter failed, attempting Google Gemini fallback...")
+            assistantContent = await callGoogleGemini()
+            usedFallback = assistantContent !== null
+          }
         }
-      } catch {
-        errorMessage = errorText || `HTTP ${apiResponse.status}`
+      } catch (error) {
+        console.error("OpenRouter API exception:", error)
+        // Try fallback on exceptions
+        console.log("OpenRouter exception, attempting Google Gemini fallback...")
+        assistantContent = await callGoogleGemini()
+        usedFallback = assistantContent !== null
       }
+    }
 
-      // Provide user-friendly error messages
-      if (apiResponse.status === 401) {
-        errorMessage = "Invalid API key. Please contact the administrator."
-      } else if (apiResponse.status === 429) {
-        errorMessage = "Rate limit exceeded. Please try again later."
-      } else if (apiResponse.status === 402) {
-        errorMessage = "Insufficient credits. Please contact the administrator."
-      }
+    // If OpenRouter wasn't used or failed, try Google Gemini
+    if (!assistantContent) {
+      console.log("Attempting Google Gemini API...")
+      assistantContent = await callGoogleGemini()
+      usedFallback = assistantContent !== null
+    }
 
-      console.error("AI API Error:", apiResponse.status, errorText)
-
-      // Save error message to database
+    // If both APIs failed, return error
+    if (!assistantContent) {
+      const errorMessage = "Unable to get AI response. Please contact the administrator."
       await sql`
         INSERT INTO messages (chat_id, user_id, role, content)
         VALUES (${chatId}, ${userId}, 'error', ${errorMessage})
       `
-
       return NextResponse.json(
         { error: errorMessage },
-        { status: apiResponse.status >= 500 ? 500 : 400 }
-      )
-    }
-
-    const aiData = await apiResponse.json()
-
-    if (!aiData.choices || !aiData.choices[0] || !aiData.choices[0].message) {
-      console.error("Invalid AI API response structure:", aiData)
-
-      await sql`
-        INSERT INTO messages (chat_id, user_id, role, content)
-        VALUES (${chatId}, ${userId}, 'error', ${'Invalid response structure from AI API'})
-      `
-
-      return NextResponse.json(
-        { error: 'Invalid response structure from AI API' },
         { status: 500 }
       )
     }
 
-    const assistantContent = aiData.choices[0].message.content || "No response received"
+    if (usedFallback) {
+      console.log("Used Google Gemini as fallback")
+    }
 
     // Save assistant message to database
     const assistantMessageResult = await sql`
