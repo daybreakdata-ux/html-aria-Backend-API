@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,12 +20,22 @@ const themes = [
     name: "Ocean Blue",
     description: "Calming blue tones inspired by the ocean",
     colors: {
-      accent: "#208299",
-      userMessage: "#1e6b7a",
-      background: "#f8fafc",
-      surface: "#ffffff",
-      text: "#1e293b",
-      muted: "#64748b"
+      light: {
+        accent: "#208299",
+        userMessage: "#1e6b7a",
+        background: "#f8fafc",
+        surface: "#ffffff",
+        text: "#1e293b",
+        muted: "#64748b"
+      },
+      dark: {
+        accent: "#22d3ee",
+        userMessage: "#06b6d4",
+        background: "#0c1621",
+        surface: "#1e293b",
+        text: "#f1f5f9",
+        muted: "#94a3b8"
+      }
     }
   },
   {
@@ -32,12 +43,22 @@ const themes = [
     name: "Forest Green",
     description: "Natural green palette for a fresh feel",
     colors: {
-      accent: "#059669",
-      userMessage: "#047857",
-      background: "#f0fdf4",
-      surface: "#ffffff",
-      text: "#14532d",
-      muted: "#16a34a"
+      light: {
+        accent: "#059669",
+        userMessage: "#047857",
+        background: "#f0fdf4",
+        surface: "#ffffff",
+        text: "#14532d",
+        muted: "#16a34a"
+      },
+      dark: {
+        accent: "#34d399",
+        userMessage: "#10b981",
+        background: "#0a1f14",
+        surface: "#14532d",
+        text: "#f0fdf4",
+        muted: "#86efac"
+      }
     }
   },
   {
@@ -45,12 +66,22 @@ const themes = [
     name: "Sunset Orange",
     description: "Warm orange and pink tones",
     colors: {
-      accent: "#ea580c",
-      userMessage: "#dc2626",
-      background: "#fff7ed",
-      surface: "#ffffff",
-      text: "#9a3412",
-      muted: "#fb923c"
+      light: {
+        accent: "#ea580c",
+        userMessage: "#dc2626",
+        background: "#fff7ed",
+        surface: "#ffffff",
+        text: "#9a3412",
+        muted: "#fb923c"
+      },
+      dark: {
+        accent: "#fb923c",
+        userMessage: "#f97316",
+        background: "#1c0f05",
+        surface: "#7c2d12",
+        text: "#fff7ed",
+        muted: "#fdba74"
+      }
     }
   },
   {
@@ -58,12 +89,22 @@ const themes = [
     name: "Midnight Purple",
     description: "Deep purple and blue for night owls",
     colors: {
-      accent: "#7c3aed",
-      userMessage: "#6d28d9",
-      background: "#faf5ff",
-      surface: "#ffffff",
-      text: "#581c87",
-      muted: "#a78bfa"
+      light: {
+        accent: "#7c3aed",
+        userMessage: "#6d28d9",
+        background: "#faf5ff",
+        surface: "#ffffff",
+        text: "#581c87",
+        muted: "#a78bfa"
+      },
+      dark: {
+        accent: "#a78bfa",
+        userMessage: "#8b5cf6",
+        background: "#1e1134",
+        surface: "#581c87",
+        text: "#faf5ff",
+        muted: "#c4b5fd"
+      }
     }
   },
   {
@@ -71,12 +112,22 @@ const themes = [
     name: "Rose Pink",
     description: "Soft pink and rose tones",
     colors: {
-      accent: "#db2777",
-      userMessage: "#be185d",
-      background: "#fdf2f8",
-      surface: "#ffffff",
-      text: "#831843",
-      muted: "#f472b6"
+      light: {
+        accent: "#db2777",
+        userMessage: "#be185d",
+        background: "#fdf2f8",
+        surface: "#ffffff",
+        text: "#831843",
+        muted: "#f472b6"
+      },
+      dark: {
+        accent: "#f472b6",
+        userMessage: "#ec4899",
+        background: "#1f0818",
+        surface: "#831843",
+        text: "#fdf2f8",
+        muted: "#f9a8d4"
+      }
     }
   },
   {
@@ -84,12 +135,22 @@ const themes = [
     name: "Amber Gold",
     description: "Warm gold and amber tones",
     colors: {
-      accent: "#d97706",
-      userMessage: "#b45309",
-      background: "#fffbeb",
-      surface: "#ffffff",
-      text: "#92400e",
-      muted: "#f59e0b"
+      light: {
+        accent: "#d97706",
+        userMessage: "#b45309",
+        background: "#fffbeb",
+        surface: "#ffffff",
+        text: "#92400e",
+        muted: "#f59e0b"
+      },
+      dark: {
+        accent: "#fbbf24",
+        userMessage: "#f59e0b",
+        background: "#1c1508",
+        surface: "#78350f",
+        text: "#fffbeb",
+        muted: "#fcd34d"
+      }
     }
   },
   {
@@ -97,12 +158,22 @@ const themes = [
     name: "Slate Gray",
     description: "Modern gray and blue-gray palette",
     colors: {
-      accent: "#475569",
-      userMessage: "#334155",
-      background: "#f8fafc",
-      surface: "#ffffff",
-      text: "#1e293b",
-      muted: "#64748b"
+      light: {
+        accent: "#475569",
+        userMessage: "#334155",
+        background: "#f8fafc",
+        surface: "#ffffff",
+        text: "#1e293b",
+        muted: "#64748b"
+      },
+      dark: {
+        accent: "#94a3b8",
+        userMessage: "#64748b",
+        background: "#0f172a",
+        surface: "#1e293b",
+        text: "#f8fafc",
+        muted: "#cbd5e1"
+      }
     }
   },
   {
@@ -110,12 +181,22 @@ const themes = [
     name: "Emerald",
     description: "Rich emerald and teal combination",
     colors: {
-      accent: "#065f46",
-      userMessage: "#064e3b",
-      background: "#ecfdf5",
-      surface: "#ffffff",
-      text: "#022c22",
-      muted: "#10b981"
+      light: {
+        accent: "#065f46",
+        userMessage: "#064e3b",
+        background: "#ecfdf5",
+        surface: "#ffffff",
+        text: "#022c22",
+        muted: "#10b981"
+      },
+      dark: {
+        accent: "#10b981",
+        userMessage: "#059669",
+        background: "#021810",
+        surface: "#064e3b",
+        text: "#ecfdf5",
+        muted: "#6ee7b7"
+      }
     }
   },
   {
@@ -123,12 +204,22 @@ const themes = [
     name: "Indigo",
     description: "Deep indigo and navy blue",
     colors: {
-      accent: "#312e81",
-      userMessage: "#1e1b4b",
-      background: "#eef2ff",
-      surface: "#ffffff",
-      text: "#1e1b4b",
-      muted: "#6366f1"
+      light: {
+        accent: "#312e81",
+        userMessage: "#1e1b4b",
+        background: "#eef2ff",
+        surface: "#ffffff",
+        text: "#1e1b4b",
+        muted: "#6366f1"
+      },
+      dark: {
+        accent: "#818cf8",
+        userMessage: "#6366f1",
+        background: "#0f0d29",
+        surface: "#312e81",
+        text: "#eef2ff",
+        muted: "#a5b4fc"
+      }
     }
   },
   {
@@ -136,12 +227,22 @@ const themes = [
     name: "Coral",
     description: "Vibrant coral and orange tones",
     colors: {
-      accent: "#dc2626",
-      userMessage: "#b91c1c",
-      background: "#fef2f2",
-      surface: "#ffffff",
-      text: "#991b1b",
-      muted: "#f87171"
+      light: {
+        accent: "#dc2626",
+        userMessage: "#b91c1c",
+        background: "#fef2f2",
+        surface: "#ffffff",
+        text: "#991b1b",
+        muted: "#f87171"
+      },
+      dark: {
+        accent: "#f87171",
+        userMessage: "#ef4444",
+        background: "#1a0606",
+        surface: "#7f1d1d",
+        text: "#fef2f2",
+        muted: "#fca5a5"
+      }
     }
   }
 ]
@@ -161,6 +262,8 @@ const fontFamilies = [
 
 export default function SettingsPage() {
   const router = useRouter()
+  const { theme: systemTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
   const [activeCategory, setActiveCategory] = useState("appearance")
 
   // UI Settings
@@ -189,7 +292,25 @@ export default function SettingsPage() {
   const logoTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const logoIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Get the current mode (light or dark)
+  const isDarkMode = systemTheme === 'dark'
+
+  // Helper function to get theme colors based on current mode
+  const getThemeColors = (theme: typeof themes[0]) => {
+    return isDarkMode ? theme.colors.dark : theme.colors.light
+  }
+
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+
     // Load UI settings from localStorage
     setChatBoxWidth(Number(localStorage.getItem("aria_chat_width")) || 768)
     setLightModeBrightness(Number(localStorage.getItem("aria_light_brightness")) || 100)
@@ -203,18 +324,19 @@ export default function SettingsPage() {
 
     // Load font settings for current theme
     const themePrefix = `aria_theme_${savedTheme}_`
+    const themeColors = getThemeColors(theme)
     setMenuFontFamily(localStorage.getItem(`${themePrefix}menu_font_family`) || "Inter, sans-serif")
     setMenuFontSize(Number(localStorage.getItem(`${themePrefix}menu_font_size`)) || 14)
-    setMenuFontColor(localStorage.getItem(`${themePrefix}menu_font_color`) || theme.colors.text)
+    setMenuFontColor(localStorage.getItem(`${themePrefix}menu_font_color`) || themeColors.text)
     setChatFontFamily(localStorage.getItem(`${themePrefix}chat_font_family`) || "Inter, sans-serif")
     setChatFontSize(Number(localStorage.getItem(`${themePrefix}chat_font_size`)) || 14)
-    setChatFontColor(localStorage.getItem(`${themePrefix}chat_font_color`) || theme.colors.text)
+    setChatFontColor(localStorage.getItem(`${themePrefix}chat_font_color`) || themeColors.text)
     setSystemFontFamily(localStorage.getItem(`${themePrefix}system_font_family`) || "Inter, sans-serif")
     setSystemFontSize(Number(localStorage.getItem(`${themePrefix}system_font_size`)) || 14)
-    setSystemFontColor(localStorage.getItem(`${themePrefix}system_font_color`) || theme.colors.muted)
+    setSystemFontColor(localStorage.getItem(`${themePrefix}system_font_color`) || themeColors.muted)
 
     setManualLocation(localStorage.getItem("aria_manual_location") || "")
-  }, [])
+  }, [mounted, isDarkMode])
 
   // Apply CSS variables in real-time
   useEffect(() => {
@@ -227,9 +349,10 @@ export default function SettingsPage() {
     root.style.setProperty("--light-brightness", `${lightModeBrightness}%`)
     root.style.setProperty("--dark-brightness", `${darkModeBrightness}%`)
 
-    // Apply theme colors
-    root.style.setProperty("--accent-color", currentTheme.colors.accent)
-    root.style.setProperty("--user-message-color", currentTheme.colors.userMessage)
+    // Apply theme colors based on current mode
+    const themeColors = getThemeColors(currentTheme)
+    root.style.setProperty("--accent-color", themeColors.accent)
+    root.style.setProperty("--user-message-color", themeColors.userMessage)
 
     // Apply font settings
     root.style.setProperty("--menu-font-family", menuFontFamily)
@@ -254,18 +377,20 @@ export default function SettingsPage() {
       const savedMenuFamily = localStorage.getItem(`${themePrefix}menu_font_family`)
       const savedChatFamily = localStorage.getItem(`${themePrefix}chat_font_family`)
       const savedSystemFamily = localStorage.getItem(`${themePrefix}system_font_family`)
+      
+      const themeColors = getThemeColors(theme)
 
       setMenuFontFamily(savedMenuFamily || "Inter, sans-serif")
       setMenuFontSize(Number(localStorage.getItem(`${themePrefix}menu_font_size`)) || 14)
-      setMenuFontColor(localStorage.getItem(`${themePrefix}menu_font_color`) || theme.colors.text)
+      setMenuFontColor(localStorage.getItem(`${themePrefix}menu_font_color`) || themeColors.text)
 
       setChatFontFamily(savedChatFamily || "Inter, sans-serif")
       setChatFontSize(Number(localStorage.getItem(`${themePrefix}chat_font_size`)) || 14)
-      setChatFontColor(localStorage.getItem(`${themePrefix}chat_font_color`) || theme.colors.text)
+      setChatFontColor(localStorage.getItem(`${themePrefix}chat_font_color`) || themeColors.text)
 
       setSystemFontFamily(savedSystemFamily || "Inter, sans-serif")
       setSystemFontSize(Number(localStorage.getItem(`${themePrefix}system_font_size`)) || 14)
-      setSystemFontColor(localStorage.getItem(`${themePrefix}system_font_color`) || theme.colors.muted)
+      setSystemFontColor(localStorage.getItem(`${themePrefix}system_font_color`) || themeColors.muted)
     }
   }
 
@@ -412,31 +537,37 @@ export default function SettingsPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {themes.map((theme) => (
-                          <div
-                            key={theme.id}
-                            onClick={() => handleThemeChange(theme.id)}
-                            className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                              selectedTheme === theme.id
-                                ? 'border-primary bg-primary/5 shadow-md'
-                                : 'border-border hover:border-primary/50'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between mb-3">
-                              <h3 className="font-semibold">{theme.name}</h3>
-                              {selectedTheme === theme.id && (
-                                <div className="w-4 h-4 rounded-full bg-primary animate-pulse" />
-                              )}
-                            </div>
+                        {themes.map((theme) => {
+                          const themeColors = getThemeColors(theme)
+                          return (
                             <div
-                              className="h-12 rounded-md mb-2 flex items-center justify-center text-white text-sm font-medium"
-                              style={{ background: `linear-gradient(to right, ${theme.colors.accent}, ${theme.colors.userMessage})` }}
+                              key={theme.id}
+                              onClick={() => handleThemeChange(theme.id)}
+                              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                selectedTheme === theme.id
+                                  ? 'border-primary bg-primary/10 shadow-md ring-2 ring-primary/20'
+                                  : 'border-border hover:border-primary/50 hover:shadow-sm'
+                              }`}
                             >
-                              Preview
+                              <div className="flex items-center justify-between mb-3">
+                                <h3 className="font-semibold text-foreground">{theme.name}</h3>
+                                {selectedTheme === theme.id && (
+                                  <div className="w-4 h-4 rounded-full bg-primary animate-pulse" />
+                                )}
+                              </div>
+                              <div
+                                className="h-16 rounded-md mb-2 flex items-center justify-center text-white text-sm font-medium shadow-sm overflow-hidden relative"
+                                style={{ background: `linear-gradient(135deg, ${themeColors.accent}, ${themeColors.userMessage})` }}
+                              >
+                                <span className="relative z-10 drop-shadow-md">Preview</span>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+                              </div>
+                              <p className="text-xs font-medium" style={{ color: isDarkMode ? '#a1a1aa' : '#71717a' }}>
+                                {theme.description}
+                              </p>
                             </div>
-                            <p className="text-xs text-muted-foreground">{theme.description}</p>
-                          </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     </CardContent>
                   </Card>
@@ -503,10 +634,11 @@ export default function SettingsPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="p-3 bg-muted/50 rounded-md">
-                          <p className="text-sm" style={{ fontFamily: menuFontFamily, fontSize: `${menuFontSize}px`, color: menuFontColor }}>
+                        <div className="p-4 bg-muted/30 rounded-md border border-border">
+                          <p className="text-sm font-medium mb-1" style={{ fontFamily: menuFontFamily, fontSize: `${menuFontSize}px`, color: menuFontColor }}>
                             Preview: Settings • History • Modes
                           </p>
+                          <p className="text-xs opacity-60">Menu font preview</p>
                         </div>
                       </div>
 
@@ -560,10 +692,11 @@ export default function SettingsPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="p-3 bg-muted/50 rounded-md">
-                          <p className="text-sm" style={{ fontFamily: chatFontFamily, fontSize: `${chatFontSize}px`, color: chatFontColor }}>
+                        <div className="p-4 bg-muted/30 rounded-md border border-border">
+                          <p className="text-sm font-medium mb-1" style={{ fontFamily: chatFontFamily, fontSize: `${chatFontSize}px`, color: chatFontColor }}>
                             Preview: This is how your chat messages will look with the selected font settings.
                           </p>
+                          <p className="text-xs opacity-60">Chat message font preview</p>
                         </div>
                       </div>
 
@@ -617,10 +750,11 @@ export default function SettingsPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="p-3 bg-muted/50 rounded-md">
-                          <p className="text-sm" style={{ fontFamily: systemFontFamily, fontSize: `${systemFontSize}px`, color: systemFontColor }}>
+                        <div className="p-4 bg-muted/30 rounded-md border border-border">
+                          <p className="text-sm font-medium mb-1" style={{ fontFamily: systemFontFamily, fontSize: `${systemFontSize}px`, color: systemFontColor }}>
                             Preview: Buttons, labels, and other system text will use this styling.
                           </p>
+                          <p className="text-xs opacity-60">System font preview</p>
                         </div>
                       </div>
                     </CardContent>
