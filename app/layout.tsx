@@ -54,10 +54,24 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {children}
-            <Analytics />
+            {/* Only load Analytics on the client side to avoid service worker issues */}
+            <ClientAnalytics />
           </ThemeProvider>
         </AuthProvider>
       </body>
     </html>
   )
+}
+
+// Client-side only Analytics component
+function ClientAnalytics() {
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
+  return <Analytics />
 }
