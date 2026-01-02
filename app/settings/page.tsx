@@ -196,11 +196,9 @@ export default function SettingsPage() {
   const handleClearHistory = async () => {
     if (confirm("Are you sure you want to clear all chat history? This cannot be undone.")) {
       try {
-        // Show loading state
-        alert("Clearing chat history...")
-
-        // Clear local storage first
+        // Clear local chat-related localStorage items
         localStorage.removeItem("aria_chats")
+        localStorage.removeItem("aria_anonymous_messages")
 
         // Clear any other chat-related localStorage items
         const keysToRemove = []
@@ -213,7 +211,6 @@ export default function SettingsPage() {
         keysToRemove.forEach(key => localStorage.removeItem(key))
 
         // Clear server-side chats (only attempt if we think user might be authenticated)
-        // We'll try the API call, and if it fails with 401, we'll just clear local storage
         console.log('Attempting to clear server-side chat history...')
         try {
           const response = await fetch('/api/chat/clear', {
@@ -246,10 +243,7 @@ export default function SettingsPage() {
 
       } catch (error) {
         console.error('Error clearing chat history:', error)
-        // Even if there's an error, the local storage was cleared
-        alert("Local chat history cleared. Server-side clearing may have failed.")
-        // Still refresh the page
-        window.location.href = window.location.href
+        alert("An error occurred while clearing chat history. Some data may remain.")
       }
     }
   }
