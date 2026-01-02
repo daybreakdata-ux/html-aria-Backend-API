@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { getSql } from '@/lib/db'
 import { performWebSearch } from '@/app/actions/web-search'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { getModeConfig } from '@/lib/mode-config'
 
 interface WebSearchResult {
   title: string
@@ -26,17 +27,20 @@ export async function POST(request: NextRequest) {
     const {
       chatId,
       message,
-      mode,
+      mode = "default",
       contextLength = 15,
-      model,
-      systemPrompt,
-      temperature,
       maxTokens,
       topP,
       frequencyPenalty,
       presencePenalty,
       uploadedFile
     } = body
+
+    // Get mode-specific configuration from environment variables
+    const modeConfig = getModeConfig(mode)
+    const model = modeConfig.model
+    const systemPrompt = modeConfig.systemPrompt
+    const temperature = modeConfig.temperature
 
     if (!chatId || !message) {
       return NextResponse.json(
@@ -101,12 +105,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Add location context to system prompt if provided
+    let finalSystemPrompt = systemPrompt
+    if (body.locationContext) {
+      finalSystemPrompt = (systemPrompt || "") + body.locationContext
+    }
+
     // Build messages array for AI API
     const messages = []
 
-    // Add system prompt if provided
-    if (systemPrompt) {
-      messages.push({ role: 'system', content: systemPrompt })
+    // Add system prompt if provided (now includes location context)
+    if (finalSystemPrompt) {
+      messages.push({ role: 'system', content: finalSystemPrompt })
     }
 
     // Add chat history
@@ -149,8 +159,8 @@ export async function POST(request: NextRequest) {
 
         // Build the prompt with system instruction and conversation history
         let fullPrompt = ""
-        if (systemPrompt) {
-          fullPrompt += `System Instructions: ${systemPrompt}\n\n`
+        if (finalSystemPrompt) {
+          fullPrompt += `System Instructions: ${finalSystemPrompt}\n\n`
         }
         
         // Add conversation history

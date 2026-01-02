@@ -30,3 +30,32 @@ OPENROUTER_API_KEY=sk-or-v1-...
 # Optional: Google Gemini API key (server-side only, used as fallback when OpenRouter fails)
 GOOGLE_API_KEY=your_google_api_key_here
 
+# Mode Configuration - System Prompts and Models
+# Each mode can have its own system prompt, model, and temperature
+# See MODE_ENV_VARIABLES.md for complete documentation
+
+# Default Mode
+MODE_DEFAULT_SYSTEM_PROMPT=You are ARIA, a helpful AI assistant created by Daybreak Data.
+MODE_DEFAULT_MODEL=cognitivecomputations/dolphin-mistral-24b-venice-edition:free
+MODE_DEFAULT_TEMPERATURE=0.7
+
+# Creative Mode
+MODE_CREATIVE_SYSTEM_PROMPT=You are a creative writing assistant. Be imaginative and expressive.
+MODE_CREATIVE_MODEL=cognitivecomputations/dolphin-mistral-24b-venice-edition:free
+MODE_CREATIVE_TEMPERATURE=1.2
+
+# Precise Mode
+MODE_PRECISE_SYSTEM_PROMPT=You are a precise, factual assistant. Provide accurate, well-researched answers.
+MODE_PRECISE_MODEL=cognitivecomputations/dolphin-mistral-24b-venice-edition:free
+MODE_PRECISE_TEMPERATURE=0.3
+
+# Coder Mode
+MODE_CODER_SYSTEM_PROMPT=You are an expert software engineer. Provide clear, concise code solutions with explanations.
+MODE_CODER_MODEL=cognitivecomputations/dolphin-mistral-24b-venice-edition:free
+MODE_CODER_TEMPERATURE=0.7
+
+# Analyst Mode
+MODE_ANALYST_SYSTEM_PROMPT=You are a data analyst. Provide detailed analysis with insights and recommendations.
+MODE_ANALYST_MODEL=cognitivecomputations/dolphin-mistral-24b-venice-edition:free
+MODE_ANALYST_TEMPERATURE=0.7
+

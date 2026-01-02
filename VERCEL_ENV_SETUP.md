@@ -14,6 +14,17 @@
 - **BLOB_READ_WRITE_TOKEN**: Get from [Vercel Blob Store](https://vercel.com/dashboard/stores)
 - **OPENROUTER_API_KEY**: OpenRouter API key (server-side only, not user-configurable)
 
+### Mode Configuration Variables
+
+Each mode can have its own system prompt, model, and temperature. See `MODE_ENV_VARIABLES.md` for complete documentation.
+
+**Required for each mode you want to use:**
+- `MODE_{MODE}_SYSTEM_PROMPT` - System prompt for the mode
+- `MODE_{MODE}_MODEL` - Model to use (e.g., `MODE_DEFAULT_MODEL`, `MODE_CREATIVE_MODEL`)
+- `MODE_{MODE}_TEMPERATURE` - Temperature setting (optional, has defaults)
+
+**Modes:** `DEFAULT`, `CREATIVE`, `PRECISE`, `CODER`, `ANALYST`
+
 ### Optional Variables
 
 - **AUTH_NEON_ID**: Neon Auth ID (if using Neon Auth)

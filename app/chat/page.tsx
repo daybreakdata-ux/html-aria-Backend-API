@@ -410,11 +410,8 @@ export default function ChatPage() {
       // Get current settings
       const contextLength = Number(localStorage.getItem("aria_context_length")) || 15
 
-      // Get active mode and apply its settings
-      const activeMode = getActiveMode()
-      const model = activeMode.model || localStorage.getItem("aria_model") || "cognitivecomputations/dolphin-mistral-24b-venice-edition:free"
-      const systemPrompt = activeMode.systemPrompt || localStorage.getItem("aria_system_prompt") || ""
-      const temperature = activeMode.temperature !== undefined ? activeMode.temperature : Number(localStorage.getItem("aria_temperature")) || 0.7
+      // Mode configuration is now handled server-side via environment variables
+      // Only send the mode ID, server will apply the correct model and prompt
 
       // Add location context if available
       let locationContext = ""
@@ -427,14 +424,12 @@ export default function ChatPage() {
         message: currentMessage,
         mode: selectedMode,
         contextLength,
-        model,
-        systemPrompt: systemPrompt + locationContext,
-        temperature,
         maxTokens: Number(localStorage.getItem("aria_max_tokens")) || 2000,
         topP: Number(localStorage.getItem("aria_top_p")) || 1,
         frequencyPenalty: Number(localStorage.getItem("aria_frequency_penalty")) || 0,
         presencePenalty: Number(localStorage.getItem("aria_presence_penalty")) || 0,
         uploadedFile: uploadedFileData,
+        ...(locationContext && { locationContext }), // Only include if location is available
       }
 
       const response = await fetch('/api/chat/message', {
