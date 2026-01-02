@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, Save, Globe, Palette, Cpu, Settings, User, Monitor, Type, Droplet } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
 
 // Theme definitions
 const themes = [
@@ -355,7 +354,6 @@ export default function SettingsPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <ThemeToggle />
             <Button onClick={handleSave} className="px-3 text-sm [&:not(:disabled):hover]:opacity-80" style={{ backgroundColor: 'var(--accent-color)' }}>
               <Save className="w-4 h-4 mr-2" />
               Save Changes

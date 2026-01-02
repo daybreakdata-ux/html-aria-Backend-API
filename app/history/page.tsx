@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ArrowLeft, Plus, Trash2, MessageSquare, Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { ThemeToggle } from "@/components/theme-toggle"
 
 interface Message {
   id: string
@@ -70,7 +69,6 @@ export default function HistoryPage() {
             </div>
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
-            <ThemeToggle />
             <Button size="sm" onClick={createNewChat} className="bg-[#208299] hover:bg-[#1a6b7a] px-2 sm:px-3 text-xs sm:text-sm">
               <Plus className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
               <span className="hidden sm:inline">New Chat</span>

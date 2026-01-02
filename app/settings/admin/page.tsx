@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
 import { ArrowLeft, Save, Lock } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
 
 const defaultSettings = {
   model: "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
@@ -119,7 +118,6 @@ export default function AdminSettingsPage() {
             </div>
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
-            <ThemeToggle />
             <Button onClick={handleSave} className="px-2 sm:px-3 text-xs sm:text-sm [&:not(:disabled):hover]:opacity-80\" style={{ backgroundColor: 'var(--accent-color)' }}>
               <Save className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
               <span className="hidden sm:inline">Save</span>

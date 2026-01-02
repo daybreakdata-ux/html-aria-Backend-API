@@ -10,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Menu, Send, Settings, Plus, X, Copy, RotateCw, Globe, Sparkles, Download, Mic, Paperclip, History, Zap, LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { PermissionsManager } from "@/components/permissions-manager"
 import { FileUploadButton } from "@/components/file-upload-button"
 import ReactMarkdown from "react-markdown"
@@ -1022,7 +1021,6 @@ export default function ChatPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <ThemeToggle />
             {status === 'authenticated' && (
               <Button size="sm" variant="ghost" onClick={createNewChat} className="h-9 px-3 hover:bg-accent/10">
                 <Plus className="w-4 h-4" />
