@@ -13,13 +13,13 @@
 ### ⚠️ Placeholders (NOT SET):
 - **BLOB_READ_WRITE_TOKEN** - ❌ `your_vercel_blob_token_here` (REQUIRED for file uploads)
 - **SERPAPI_KEY** - ❌ `your_serpapi_key_here` (OPTIONAL - web search won't work without it)
-- **OPENROUTER_API_KEY** - ❌ `"sk-or-v1-..."` (OPTIONAL - has hardcoded fallback in code)
+- **OPENROUTER_API_KEY** - ✅ Environment variable only (no hardcoded fallbacks)
 
 ### 🔍 Additional Findings:
 
 1. **Hardcoded Fallback**: There's a hardcoded OpenRouter API key in `app/chat/page.tsx` line 398:
    ```typescript
-   const apiKey = localStorage.getItem("aria_api_key") || "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"
+   // API keys are now server-side only, no client-side fallbacks
    ```
    This means OpenRouter will work even without the env var, but it's not ideal for production.
 

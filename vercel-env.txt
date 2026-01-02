@@ -25,7 +25,8 @@ BLOB_READ_WRITE_TOKEN=your_vercel_blob_token_here
 SERPAPI_KEY=your_serpapi_key_here
 
 # Required: OpenRouter API key (server-side only, not user-configurable)
-OPENROUTER_API_KEY=sk-or-v1-...
+# Set this in your Vercel environment variables dashboard
+# OPENROUTER_API_KEY=your_actual_api_key_here
 
 # Optional: Google Gemini API key (server-side only, used as fallback when OpenRouter fails)
 GOOGLE_API_KEY=your_google_api_key_here

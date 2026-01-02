@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -272,6 +273,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Button onClick={handleSave} className="px-3 text-sm [&:not(:disabled):hover]:opacity-80" style={{ backgroundColor: 'var(--accent-color)' }}>
               <Save className="w-4 h-4 mr-2" />
               Save Changes
