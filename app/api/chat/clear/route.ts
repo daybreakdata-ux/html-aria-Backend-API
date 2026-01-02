@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { getSql } from '@/lib/db'
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -13,16 +13,13 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Delete all chats for the user
-    await db.execute({
-      sql: 'DELETE FROM messages WHERE chat_id IN (SELECT id FROM chats WHERE user_id = ?)',
-      args: [session.user.id]
-    })
+    const userId = parseInt(session.user.id)
+    const sql = getSql()
 
-    await db.execute({
-      sql: 'DELETE FROM chats WHERE user_id = ?',
-      args: [session.user.id]
-    })
+    // Delete all messages for the user (messages will be deleted automatically due to CASCADE)
+    await sql`
+      DELETE FROM chats WHERE user_id = ${userId}
+    `
 
     return NextResponse.json({
       success: true,
