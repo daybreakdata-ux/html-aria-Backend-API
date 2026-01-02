@@ -1,9 +1,9 @@
-import React from "react"
+import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/components/auth-provider"
+import { ClientAnalytics } from "@/components/client-analytics"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -63,15 +63,3 @@ export default function RootLayout({
   )
 }
 
-// Client-side only Analytics component
-function ClientAnalytics() {
-  const [mounted, setMounted] = React.useState(false)
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return null
-
-  return <Analytics />
-}
