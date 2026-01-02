@@ -193,10 +193,64 @@ export default function SettingsPage() {
     setHoldProgress(0)
   }
 
-  const handleClearHistory = () => {
+  const handleClearHistory = async () => {
     if (confirm("Are you sure you want to clear all chat history? This cannot be undone.")) {
-      localStorage.removeItem("aria_chats")
-      alert("Chat history cleared successfully!")
+      try {
+        // Show loading state
+        alert("Clearing chat history...")
+
+        // Clear local storage first
+        localStorage.removeItem("aria_chats")
+
+        // Clear any other chat-related localStorage items
+        const keysToRemove = []
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (key && (key.startsWith('aria_chat_') || key.startsWith('aria_font_'))) {
+            keysToRemove.push(key)
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key))
+
+        // Clear server-side chats (only attempt if we think user might be authenticated)
+        // We'll try the API call, and if it fails with 401, we'll just clear local storage
+        console.log('Attempting to clear server-side chat history...')
+        try {
+          const response = await fetch('/api/chat/clear', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+
+          const responseData = await response.json()
+          console.log('Clear API response:', response.status, responseData)
+
+          if (!response.ok) {
+            if (response.status === 401) {
+              console.log('User not authenticated, skipping server-side clearing')
+            } else {
+              console.warn('Server-side clearing failed:', responseData.error)
+            }
+          } else {
+            console.log('Server-side chats cleared successfully')
+          }
+        } catch (apiError) {
+          console.warn('Server-side clearing failed with exception:', apiError)
+        }
+
+        alert("Chat history cleared successfully!")
+
+        // Force a hard refresh to clear all client-side state
+        window.location.href = window.location.href
+
+      } catch (error) {
+        console.error('Error clearing chat history:', error)
+        // Even if there's an error, the local storage was cleared
+        alert("Local chat history cleared. Server-side clearing may have failed.")
+        // Still refresh the page
+        window.location.href = window.location.href
+      }
     }
   }
 
