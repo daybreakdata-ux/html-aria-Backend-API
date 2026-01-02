@@ -1,0 +1,29 @@
+# Vercel Environment Variables
+# Copy these to your Vercel project dashboard:
+# https://vercel.com/your-project/settings/environment-variables
+#
+# IMPORTANT: Replace placeholder values with your actual values
+
+# Database: Get from Neon dashboard
+DATABASE_URL=postgresql://neondb_owner:npg_uxPZqYOA4vI8@ep-crimson-river-ahzz6044-pooler.c-3.us-east-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require
+
+# NextAuth.js: Generate a secure random string (use the same one from .env.local)
+NEXTAUTH_SECRET=RdJ8gIykPr6hYGl+3+eW/Rh484QBj4h3of9ooFYIea8=
+
+# NextAuth.js: Set to your Vercel deployment URL (will be auto-set, but you can override)
+NEXTAUTH_URL=https://your-app-name.vercel.app
+
+# Neon Auth Configuration
+AUTH_NEON_ID=shiny-scene-32895068
+AUTH_NEON_SECRET=uSkBJHpqv8LrHDJlCDDhpuddPwnvmZ2E/91KR15k6PM=
+AUTH_NEON_ISSUER=https://ep-crimson-river-ahzz6044.neonauth.c-3.us-east-1.aws.neon.tech/neondb/auth
+
+# Required: Get from https://vercel.com/dashboard/stores
+BLOB_READ_WRITE_TOKEN=your_vercel_blob_token_here
+
+# Optional: For web search functionality
+SERPAPI_KEY=your_serpapi_key_here
+
+# Required: OpenRouter API key (server-side only, not user-configurable)
+OPENROUTER_API_KEY=sk-or-v1-...
+

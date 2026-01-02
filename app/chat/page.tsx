@@ -125,8 +125,11 @@ export default function ChatPage() {
           createdAt: new Date(chat.created_at),
         }))
         setChats(formattedChats)
-        if (formattedChats.length > 0) {
-          setActiveChat(formattedChats[0].id)
+        if (formattedChats.length > 0 && !activeChat) {
+          const firstChatId = formattedChats[0].id
+          setActiveChat(firstChatId)
+          // Load messages for the first chat
+          loadChatMessages(firstChatId)
         }
       }
     } catch (error) {
@@ -201,6 +204,17 @@ export default function ChatPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [chats, activeChat])
+
+  // Auto-load messages when activeChat changes
+  useEffect(() => {
+    if (activeChat && status === 'authenticated') {
+      const currentChat = chats.find(c => c.id === activeChat)
+      // Only load if chat exists but has no messages loaded yet
+      if (currentChat && currentChat.messages.length === 0) {
+        loadChatMessages(activeChat)
+      }
+    }
+  }, [activeChat, status])
 
   // Predefined modes - will be fetched from backend API later
   const modes: Mode[] = [
@@ -395,7 +409,6 @@ export default function ChatPage() {
 
     try {
       // Get current settings
-      const apiKey = localStorage.getItem("aria_api_key") || "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"
       const contextLength = Number(localStorage.getItem("aria_context_length")) || 15
 
       // Get active mode and apply its settings
@@ -415,7 +428,6 @@ export default function ChatPage() {
         message: currentMessage,
         mode: selectedMode,
         contextLength,
-        apiKey,
         model,
         systemPrompt: systemPrompt + locationContext,
         temperature,

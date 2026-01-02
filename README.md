@@ -74,7 +74,7 @@ BLOB_READ_WRITE_TOKEN=your_vercel_blob_token_here
 # Optional: For web search functionality
 SERPAPI_KEY=your_serpapi_key_here
 
-# Optional: Default OpenRouter API key (users can set their own)
+# Required: OpenRouter API key (server-side only, not user-configurable)
 OPENROUTER_API_KEY="sk-or-v1-..."
 ```
 
@@ -91,8 +91,9 @@ pnpm dev
 2. Create an account or sign in
 3. Grant permissions for microphone/location if desired
 4. Go to Settings (⚙️ icon)
-5. Enter your OpenRouter API key
-6. (Optional) Configure model preferences and other settings
+5. (Optional) Configure model preferences and other settings
+
+**Note:** The OpenRouter API key is configured server-side by the administrator and cannot be changed by users.
 
 ## Usage
 

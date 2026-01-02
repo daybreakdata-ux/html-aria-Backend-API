@@ -6,6 +6,7 @@ import { getSql } from './db'
 
 function createNextAuthConfig() {
   return {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
       name: 'credentials',

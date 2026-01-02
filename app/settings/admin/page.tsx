@@ -11,7 +11,6 @@ import { ArrowLeft, Save, Lock } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 const defaultSettings = {
-  apiKey: "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",
   model: "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
   secondaryModel: "gemma-2.5-flash",
   temperature: 0.7,
@@ -100,11 +99,6 @@ export default function AdminSettingsPage() {
   }, [router])
 
   const loadSettings = () => {
-    // Initialize API key if not present (hidden from UI but required for functionality)
-    if (!localStorage.getItem("aria_api_key")) {
-      localStorage.setItem("aria_api_key", defaultSettings.apiKey)
-    }
-
     // Load settings from localStorage
     setModel(localStorage.getItem("aria_model") || defaultSettings.model)
     setSecondaryModel(localStorage.getItem("aria_secondary_model") || defaultSettings.secondaryModel)

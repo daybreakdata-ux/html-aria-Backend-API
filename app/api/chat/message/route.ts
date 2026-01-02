@@ -27,7 +27,6 @@ export async function POST(request: NextRequest) {
       message,
       mode,
       contextLength = 15,
-      apiKey,
       model,
       systemPrompt,
       temperature,
@@ -133,6 +132,19 @@ export async function POST(request: NextRequest) {
       content: currentMessageContent,
     })
 
+    // Get API key from environment variable only (server-side, not user-configurable)
+    const finalApiKey = process.env.OPENROUTER_API_KEY
+    if (!finalApiKey || finalApiKey === "sk-or-v1-..." || finalApiKey.includes("your_")) {
+      await sql`
+        INSERT INTO messages (chat_id, user_id, role, content)
+        VALUES (${chatId}, ${userId}, 'error', ${'API key not configured. Please contact the administrator.'})
+      `
+      return NextResponse.json(
+        { error: 'API key not configured. Please contact the administrator.' },
+        { status: 500 }
+      )
+    }
+
     console.log('Sending messages to AI API:', messages.length, 'messages')
 
     // Make API call to OpenRouter
@@ -140,7 +152,7 @@ export async function POST(request: NextRequest) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey || process.env.OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${finalApiKey}`,
       },
       body: JSON.stringify({
         model: model || "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
@@ -155,17 +167,39 @@ export async function POST(request: NextRequest) {
 
     if (!apiResponse.ok) {
       const errorText = await apiResponse.text()
+      let errorMessage = `Failed to get AI response`
+      
+      try {
+        const errorData = JSON.parse(errorText)
+        if (errorData.error?.message) {
+          errorMessage = errorData.error.message
+        } else if (errorData.error) {
+          errorMessage = String(errorData.error)
+        }
+      } catch {
+        errorMessage = errorText || `HTTP ${apiResponse.status}`
+      }
+
+      // Provide user-friendly error messages
+      if (apiResponse.status === 401) {
+        errorMessage = "Invalid API key. Please contact the administrator."
+      } else if (apiResponse.status === 429) {
+        errorMessage = "Rate limit exceeded. Please try again later."
+      } else if (apiResponse.status === 402) {
+        errorMessage = "Insufficient credits. Please contact the administrator."
+      }
+
       console.error("AI API Error:", apiResponse.status, errorText)
 
       // Save error message to database
       await sql`
         INSERT INTO messages (chat_id, user_id, role, content)
-        VALUES (${chatId}, ${userId}, 'error', ${`Failed to get AI response: ${errorText}`})
+        VALUES (${chatId}, ${userId}, 'error', ${errorMessage})
       `
 
       return NextResponse.json(
-        { error: `AI API returned ${apiResponse.status}: ${errorText}` },
-        { status: 500 }
+        { error: errorMessage },
+        { status: apiResponse.status >= 500 ? 500 : 400 }
       )
     }
 
