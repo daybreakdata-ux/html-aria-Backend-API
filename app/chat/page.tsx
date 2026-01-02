@@ -66,6 +66,7 @@ export default function ChatPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarView, setSidebarView] = useState<"history" | "modes">("history")
   const [selectedMode, setSelectedMode] = useState<string>("default")
+  const [isSpeaking, setIsSpeaking] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mediaRecorderRef = useRef<any>(null)
@@ -251,6 +252,12 @@ export default function ChatPage() {
       icon: "📊",
       systemPrompt: "You are a data analyst. Provide detailed analysis with insights and recommendations.",
     },
+    {
+      id: "voice",
+      name: "Voice Chat",
+      description: "Conversational AI with voice input and output",
+      icon: "🎤",
+    },
   ]
 
   const handleModeSelect = (modeId: string) => {
@@ -262,6 +269,56 @@ export default function ChatPage() {
 
   const getActiveMode = () => {
     return modes.find(m => m.id === selectedMode) || modes[0]
+  }
+
+  // Text-to-Speech functionality
+  const speakText = async (text: string) => {
+    if (!text || selectedMode !== "voice") return
+
+    // Check if speech is enabled
+    const speechEnabled = localStorage.getItem("aria_speech_enabled")
+    if (speechEnabled !== "true") {
+      console.log("Text-to-speech not enabled")
+      return
+    }
+
+    try {
+      // Cancel any ongoing speech
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel()
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text)
+      utterance.rate = 0.9 // Slightly slower for clarity
+      utterance.pitch = 1.0
+      utterance.volume = 1.0
+
+      // Try to use a female voice if available
+      const voices = window.speechSynthesis.getVoices()
+      const preferredVoice = voices.find(voice =>
+        voice.name.toLowerCase().includes('female') ||
+        voice.name.toLowerCase().includes('samantha') ||
+        voice.name.toLowerCase().includes('zira')
+      ) || voices[0]
+
+      if (preferredVoice) {
+        utterance.voice = preferredVoice
+      }
+
+      utterance.onstart = () => setIsSpeaking(true)
+      utterance.onend = () => setIsSpeaking(false)
+      utterance.onerror = () => setIsSpeaking(false)
+
+      window.speechSynthesis.speak(utterance)
+    } catch (error) {
+      console.error("Text-to-speech error:", error)
+      setIsSpeaking(false)
+    }
+  }
+
+  const stopSpeaking = () => {
+    window.speechSynthesis.cancel()
+    setIsSpeaking(false)
   }
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -315,6 +372,10 @@ export default function ChatPage() {
 
       recognition.onend = () => {
         setIsRecording(false)
+        // In voice chat mode, automatically send the message after recording
+        if (selectedMode === "voice" && message.trim()) {
+          setTimeout(() => sendMessage(), 500) // Small delay to ensure UI updates
+        }
       }
 
       mediaRecorderRef.current = recognition
@@ -472,6 +533,11 @@ export default function ChatPage() {
           return chat
         })
       )
+
+      // Speak the AI response if in voice chat mode
+      if (selectedMode === "voice" && data.assistantMessage?.content) {
+        speakText(data.assistantMessage.content)
+      }
 
       // If web search was performed, show the searching animation briefly
       if (data.assistantMessage.webSearchResults) {
@@ -995,52 +1061,118 @@ export default function ChatPage() {
               </Button>
             </div>
           )}
-          <div className="flex gap-2 items-end">
-            <FileUploadButton onFileSelect={handleFileUpload} disabled={isLoading} />
-            <Textarea
-              ref={textareaRef}
-              value={message}
-              onChange={handleTextareaChange}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault()
-                  sendMessage()
-                }
-              }}
-              placeholder="Ask me anything..."
-              className="resize-none min-h-[44px] max-h-[120px] sm:max-h-[200px] rounded-xl sm:rounded-2xl text-sm sm:text-base touch-manipulation"
-              rows={1}
-              disabled={isLoading}
-            />
-            <Button
-              size="sm"
-              onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-              disabled={isLoading}
-              className={cn(
-                "h-11 w-11 sm:h-12 sm:w-12 p-0 flex-shrink-0 rounded-xl touch-manipulation",
-                isRecording 
-                  ? "bg-red-600 hover:bg-red-700 animate-pulse text-white" 
-                  : "bg-background hover:bg-muted border-2 border-input text-foreground"
-              )}
-              title={isRecording ? "Stop recording" : "Voice input"}
-            >
-              <Mic className={cn(
-                "w-4 h-4 sm:w-5 sm:h-5",
-                isRecording ? "text-white" : "text-foreground"
-              )} />
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => sendMessage()}
-              disabled={isLoading || !message.trim()}
-              className="h-11 w-11 sm:h-12 sm:w-12 p-0 flex-shrink-0 rounded-xl touch-manipulation [&:not(:disabled):hover]:opacity-80"
-              style={{ backgroundColor: 'var(--accent-color)' }}
-            >
-              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-            </Button>
-          </div>
+          {/* Voice Chat Mode */}
+          {selectedMode === "voice" ? (
+            <div className="space-y-4">
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent/20 text-accent rounded-full text-sm">
+                  🎤 Voice Chat Mode
+                </div>
+                {isSpeaking && (
+                  <div className="mt-2 text-sm text-muted-foreground flex items-center justify-center gap-2">
+                    <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+                    AI is speaking...
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-center gap-4">
+                <Button
+                  size="lg"
+                  onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                  disabled={isLoading || isSpeaking}
+                  className={cn(
+                    "h-16 w-16 rounded-full text-white font-medium",
+                    isRecording
+                      ? "bg-red-600 hover:bg-red-700 animate-pulse"
+                      : "bg-accent hover:bg-accent/90"
+                  )}
+                  title={isRecording ? "Stop recording" : "Start voice input"}
+                >
+                  {isRecording ? (
+                    <div className="flex flex-col items-center">
+                      <div className="w-3 h-3 bg-white rounded-full animate-pulse mb-1" />
+                      <span className="text-xs">Stop</span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center">
+                      <Mic className="w-6 h-6 mb-1" />
+                      <span className="text-xs">Speak</span>
+                    </div>
+                  )}
+                </Button>
+
+                {isSpeaking && (
+                  <Button
+                    size="lg"
+                    onClick={stopSpeaking}
+                    className="h-16 w-16 rounded-full bg-gray-600 hover:bg-gray-700 text-white"
+                    title="Stop speaking"
+                  >
+                    <div className="flex flex-col items-center">
+                      <span className="text-lg">⏹️</span>
+                      <span className="text-xs">Stop</span>
+                    </div>
+                  </Button>
+                )}
+              </div>
+
+              <div className="text-center text-xs text-muted-foreground">
+                Tap the microphone to speak • AI will respond with voice
+              </div>
+            </div>
+          ) : (
+            /* Text Chat Mode */
+            <div className="flex gap-2 items-end">
+              <FileUploadButton onFileSelect={handleFileUpload} disabled={isLoading} />
+              <Textarea
+                ref={textareaRef}
+                value={message}
+                onChange={handleTextareaChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault()
+                    sendMessage()
+                  }
+                }}
+                placeholder="Ask me anything..."
+                className="resize-none min-h-[44px] max-h-[120px] sm:max-h-[200px] rounded-xl sm:rounded-2xl text-sm sm:text-base touch-manipulation"
+                rows={1}
+                disabled={isLoading}
+              />
+              <Button
+                size="sm"
+                onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                disabled={isLoading}
+                className={cn(
+                  "h-11 w-11 sm:h-12 sm:w-12 p-0 flex-shrink-0 rounded-xl touch-manipulation",
+                  isRecording
+                    ? "bg-red-600 hover:bg-red-700 animate-pulse text-white"
+                    : "bg-background hover:bg-muted border-2 border-input text-foreground"
+                )}
+                title={isRecording ? "Stop recording" : "Voice input"}
+              >
+                <Mic className={cn(
+                  "w-4 h-4 sm:w-5 sm:h-5",
+                  isRecording ? "text-white" : "text-foreground"
+                )} />
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => sendMessage()}
+                disabled={isLoading || !message.trim()}
+                className="h-11 w-11 sm:h-12 sm:w-12 p-0 flex-shrink-0 rounded-xl touch-manipulation [&:not(:disabled):hover]:opacity-80"
+                style={{ backgroundColor: 'var(--accent-color)' }}
+              >
+                <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
+            </div>
+          )}
           <p className="text-[10px] sm:text-xs text-muted-foreground text-center mt-2 hidden sm:block">
-            Press Enter to send • Shift + Enter for new line • Upload files • Voice input • Location-aware
+            {selectedMode === "voice"
+              ? "Voice chat mode • Speak naturally • AI responds with voice"
+              : "Press Enter to send • Shift + Enter for new line • Upload files • Voice input • Location-aware"
+            }
           </p>
         </div>
         </div>

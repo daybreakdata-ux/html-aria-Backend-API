@@ -29,6 +29,16 @@ System prompts and models for each mode are now configured via Vercel environmen
 - `MODE_ANALYST_MODEL` - Model to use for analyst mode
 - `MODE_ANALYST_TEMPERATURE` - Temperature for analyst mode
 
+### Voice Chat Mode
+- `MODE_VOICE_SYSTEM_PROMPT` - System prompt for voice chat mode (default: conversational AI assistant prompt optimized for spoken responses)
+- `MODE_VOICE_MODEL` - Model to use for voice chat mode
+- `MODE_VOICE_TEMPERATURE` - Temperature for voice chat mode (default: `0.8`)
+
+### Voice Chat Mode
+- `MODE_VOICE_SYSTEM_PROMPT` - System prompt for voice chat mode (default: conversational AI assistant prompt)
+- `MODE_VOICE_MODEL` - Model to use for voice chat mode
+- `MODE_VOICE_TEMPERATURE` - Temperature for voice chat mode (default: 0.8)
+
 ## Example Configuration
 
 ```env

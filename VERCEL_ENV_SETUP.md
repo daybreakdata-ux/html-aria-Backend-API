@@ -23,7 +23,7 @@ Each mode can have its own system prompt, model, and temperature. See `MODE_ENV_
 - `MODE_{MODE}_MODEL` - Model to use (e.g., `MODE_DEFAULT_MODEL`, `MODE_CREATIVE_MODEL`)
 - `MODE_{MODE}_TEMPERATURE` - Temperature setting (optional, has defaults)
 
-**Modes:** `DEFAULT`, `CREATIVE`, `PRECISE`, `CODER`, `ANALYST`
+**Modes:** `DEFAULT`, `CREATIVE`, `PRECISE`, `CODER`, `ANALYST`, `VOICE`
 
 ### Optional Variables
 

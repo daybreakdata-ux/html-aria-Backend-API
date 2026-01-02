@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { MapPin, Mic, FileText, X, Check, Sparkles } from "lucide-react"
+import { MapPin, Mic, FileText, Volume2, X, Check, Sparkles } from "lucide-react"
 
 interface Permission {
-  type: "location" | "microphone" | "files"
+  type: "location" | "microphone" | "files" | "speech"
   status: "pending" | "granted" | "denied"
   label: string
   description: string
@@ -39,6 +39,13 @@ export function PermissionsManager({ onPermissionsUpdate }: PermissionsManagerPr
       label: "File Access",
       description: "For saving downloads and uploading files",
       icon: <FileText className="w-4 h-4" />,
+    },
+    {
+      type: "speech",
+      status: "pending",
+      label: "Text-to-Speech",
+      description: "For AI voice responses in voice chat mode",
+      icon: <Volume2 className="w-4 h-4" />,
     },
   ])
 
@@ -92,7 +99,7 @@ export function PermissionsManager({ onPermissionsUpdate }: PermissionsManagerPr
     localStorage.setItem("aria_permissions_state", JSON.stringify(permState))
   }
 
-  const requestPermission = async (type: "location" | "microphone" | "files") => {
+  const requestPermission = async (type: "location" | "microphone" | "files" | "speech") => {
     try {
       if (type === "location") {
         navigator.geolocation.getCurrentPosition(
@@ -117,6 +124,16 @@ export function PermissionsManager({ onPermissionsUpdate }: PermissionsManagerPr
         // Files API doesn't need explicit permission, just mark as granted
         updatePermissionStatus("files", "granted")
         localStorage.setItem("aria_files_enabled", "true")
+        notifyParent()
+      } else if (type === "speech") {
+        // Text-to-speech doesn't need explicit permission, check if it's available
+        if ('speechSynthesis' in window) {
+          updatePermissionStatus("speech", "granted")
+          localStorage.setItem("aria_speech_enabled", "true")
+        } else {
+          updatePermissionStatus("speech", "denied")
+          localStorage.setItem("aria_speech_enabled", "false")
+        }
         notifyParent()
       }
     } catch (error) {

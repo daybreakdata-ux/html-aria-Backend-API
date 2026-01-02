@@ -52,6 +52,12 @@ export function getModeConfig(modeId: string): {
         model: process.env.MODE_ANALYST_MODEL || defaultModel,
         temperature: Number(process.env.MODE_ANALYST_TEMPERATURE) || defaultTemperature,
       }
+    case "voice":
+      return {
+        systemPrompt: process.env.MODE_VOICE_SYSTEM_PROMPT || "You are a conversational AI assistant. Keep your responses conversational, friendly, and engaging. Respond naturally as if in a spoken conversation, not writing an essay. Keep responses reasonably brief but complete.",
+        model: process.env.MODE_VOICE_MODEL || defaultModel,
+        temperature: Number(process.env.MODE_VOICE_TEMPERATURE) || 0.8,
+      }
     default:
       return {
         systemPrompt: defaultSystemPrompt,

@@ -59,3 +59,8 @@ MODE_ANALYST_SYSTEM_PROMPT=You are a data analyst. Provide detailed analysis wit
 MODE_ANALYST_MODEL=cognitivecomputations/dolphin-mistral-24b-venice-edition:free
 MODE_ANALYST_TEMPERATURE=0.7
 
+# Voice Chat Mode
+MODE_VOICE_SYSTEM_PROMPT=You are a conversational AI assistant. Keep your responses conversational, friendly, and engaging. Respond naturally as if in a spoken conversation, not writing an essay. Keep responses reasonably brief but complete.
+MODE_VOICE_MODEL=cognitivecomputations/dolphin-mistral-24b-venice-edition:free
+MODE_VOICE_TEMPERATURE=0.8
+
