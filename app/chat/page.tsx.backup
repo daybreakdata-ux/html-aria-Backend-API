@@ -1,0 +1,687 @@
+"use client"
+
+import type React from "react"
+
+import { useState, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Menu, Send, Settings, Plus, X, Copy, RotateCw, Globe, Sparkles, Download } from "lucide-react"
+import { cn } from "@/lib/utils"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import { performWebSearch } from "@/app/actions/web-search"
+
+interface Message {
+  id: string
+  role: "user" | "assistant" | "error" | "system"
+  content: string
+  timestamp: Date
+  webSearchResults?: WebSearchResult[]
+  downloadUrl?: string
+  downloadFilename?: string
+}
+
+interface WebSearchResult {
+  title: string
+  url: string
+  snippet: string
+}
+
+interface Chat {
+  id: string
+  title: string
+  messages: Message[]
+  createdAt: Date
+}
+
+export default function ChatPage() {
+  const router = useRouter()
+  const [showPermissions, setShowPermissions] = useState(true)
+  const [chats, setChats] = useState<Chat[]>([])
+  const [activeChat, setActiveChat] = useState<string | null>(null)
+  const [message, setMessage] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    // Load settings from localStorage
+    const savedChats = localStorage.getItem("aria_chats")
+    if (savedChats) {
+      const parsed = JSON.parse(savedChats)
+      setChats(parsed)
+      if (parsed.length > 0) {
+        setActiveChat(parsed[0].id)
+      }
+    }
+
+    const permissions = localStorage.getItem("aria_permissions")
+    if (permissions === "granted") {
+      setShowPermissions(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [chats, activeChat])
+
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMessage(e.target.value)
+    const textarea = e.target
+    textarea.style.height = "auto"
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`
+  }
+
+  const handlePermissions = (granted: boolean) => {
+    if (granted) {
+      localStorage.setItem("aria_permissions", "granted")
+      setShowPermissions(false)
+    } else {
+      router.push("/")
+    }
+  }
+
+  const createNewChat = () => {
+    const newChat: Chat = {
+      id: Date.now().toString(),
+      title: `New Chat`,
+      messages: [],
+      createdAt: new Date(),
+    }
+    const updatedChats = [newChat, ...chats]
+    setChats(updatedChats)
+    setActiveChat(newChat.id)
+    localStorage.setItem("aria_chats", JSON.stringify(updatedChats))
+  }
+
+  const sendMessage = async () => {
+    if (!message.trim() || isLoading) return
+    if (!activeChat) {
+      createNewChat()
+      setTimeout(() => sendMessage(), 100)
+      return
+    }
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: message.trim(),
+      timestamp: new Date(),
+    }
+
+    const updatedChats = chats.map((chat) => {
+      if (chat.id === activeChat) {
+        return {
+          ...chat,
+          messages: [...chat.messages, userMessage],
+          title: chat.messages.length === 0 ? message.trim().slice(0, 50) : chat.title,
+        }
+      }
+      return chat
+    })
+
+    setChats(updatedChats)
+    const currentMessage = message.trim()
+    setMessage("")
+    setIsLoading(true)
+
+    const needsRealTimeInfo = /\b(current|latest|recent|today|now|2024|2025|news|weather|price|stock|update)\b/i.test(
+      currentMessage,
+    )
+
+    let webSearchResults: WebSearchResult[] = []
+    let searchContext = ""
+
+    if (needsRealTimeInfo) {
+      setIsSearching(true)
+      webSearchResults = await performWebSearch(currentMessage)
+      setIsSearching(false)
+
+      if (webSearchResults.length > 0) {
+        searchContext = `\n\n[Web Search Results for: "${currentMessage}"]\n${webSearchResults
+          .map((r, i) => `${i + 1}. ${r.title}\n   ${r.snippet}\n   Source: ${r.url}`)
+          .join(
+            "\n\n",
+          )}\n\n[End of Search Results]\n\nPlease provide a comprehensive answer based on the above search results and your knowledge.`
+      }
+    }
+
+    try {
+      const apiKey = localStorage.getItem("aria_api_key") || "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"
+      const model =
+        localStorage.getItem("aria_model") || "cognitivecomputations/dolphin-mistral-24b-venice-edition:free"
+      const systemPrompt = localStorage.getItem("aria_system_prompt") || ""
+      const contextLength = Number(localStorage.getItem("aria_context_length")) || 15
+
+      const currentChat = updatedChats.find((c) => c.id === activeChat)
+      const recentMessages = currentChat?.messages.slice(-contextLength) || []
+
+      const messages = [
+        { role: "system", content: systemPrompt },
+        ...recentMessages.map((m) => ({
+          role: m.role === "error" || m.role === "system" ? "assistant" : m.role,
+          content: m.content,
+        })),
+      ]
+
+      if (searchContext) {
+        messages.push({
+          role: "user",
+          content: currentMessage + searchContext,
+        })
+      }
+
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: Number(localStorage.getItem("aria_temperature")) || 0.7,
+          max_tokens: Number(localStorage.getItem("aria_max_tokens")) || 2000,
+          top_p: Number(localStorage.getItem("aria_top_p")) || 1,
+          frequency_penalty: Number(localStorage.getItem("aria_frequency_penalty")) || 0,
+          presence_penalty: Number(localStorage.getItem("aria_presence_penalty")) || 0,
+        }),
+      })
+
+      const data = await response.json()
+
+      const assistantContent = data.choices?.[0]?.message?.content || "No response received"
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: assistantContent,
+        timestamp: new Date(),
+        webSearchResults: webSearchResults.length > 0 ? webSearchResults : undefined,
+      }
+
+      const finalChats = updatedChats.map((chat) => {
+        if (chat.id === activeChat) {
+          return {
+            ...chat,
+            messages: [...chat.messages, assistantMessage],
+          }
+        }
+        return chat
+      })
+
+      setChats(finalChats)
+      localStorage.setItem("aria_chats", JSON.stringify(finalChats))
+    } catch (error) {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "error",
+        content: "Failed to send message. Please check your API key and try again.",
+        timestamp: new Date(),
+      }
+
+      const errorChats = updatedChats.map((chat) => {
+        if (chat.id === activeChat) {
+          return {
+            ...chat,
+            messages: [...chat.messages, errorMessage],
+          }
+        }
+        return chat
+      })
+
+      setChats(errorChats)
+      localStorage.setItem("aria_chats", JSON.stringify(errorChats))
+    } finally {
+      setIsLoading(false)
+      setIsSearching(false)
+    }
+  }
+
+  const copyMessage = (content: string) => {
+    navigator.clipboard.writeText(content)
+  }
+
+  const regenerateMessage = async (messageId: string) => {
+    const currentChat = chats.find((c) => c.id === activeChat)
+    if (!currentChat) return
+
+    const messageIndex = currentChat.messages.findIndex((m) => m.id === messageId)
+    if (messageIndex === -1 || messageIndex === 0) return
+
+    const previousUserMessage = currentChat.messages[messageIndex - 1]
+    if (previousUserMessage.role !== "user") return
+
+    // Remove the assistant message and regenerate
+    const updatedMessages = currentChat.messages.slice(0, messageIndex)
+    const updatedChats = chats.map((chat) => {
+      if (chat.id === activeChat) {
+        return { ...chat, messages: updatedMessages }
+      }
+      return chat
+    })
+
+    setChats(updatedChats)
+    setMessage(previousUserMessage.content)
+    await sendMessage()
+  }
+
+  const downloadMessage = async (content: string, messageId: string) => {
+    try {
+      // Check if message already has a download URL
+      const currentChat = chats.find((c) => c.id === activeChat)
+      const message = currentChat?.messages.find((m) => m.id === messageId)
+      
+      if (message?.downloadUrl) {
+        // File already uploaded, just download it
+        window.open(message.downloadUrl, "_blank")
+        return
+      }
+
+      // Upload the file first
+      const response = await fetch("/api/chatbot/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: content,
+          filename: `aria-response-${Date.now()}.md`,
+        }),
+      })
+
+      if (!response.ok) throw new Error("Upload failed")
+
+      const data = await response.json()
+
+      // Update message with download URL for future clicks
+      const updatedChats = chats.map((chat) => {
+        if (chat.id === activeChat) {
+          return {
+            ...chat,
+            messages: chat.messages.map((msg) =>
+              msg.id === messageId
+                ? { ...msg, downloadUrl: data.downloadUrl, downloadFilename: data.filename }
+                : msg
+            ),
+          }
+        }
+        return chat
+      })
+
+      setChats(updatedChats)
+      localStorage.setItem("aria_chats", JSON.stringify(updatedChats))
+
+      // Trigger download
+      window.open(data.downloadUrl, "_blank")
+    } catch (error) {
+      console.error("Download error:", error)
+      alert("Failed to prepare download. Please try again.")
+    }
+  }
+
+  const currentChat = chats.find((c) => c.id === activeChat)
+
+  if (showPermissions) {
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="bg-background rounded-2xl max-w-md w-full p-8 shadow-2xl text-center border border-border">
+          <div className="w-16 h-16 bg-gradient-to-br from-[#208299] to-[#1a6b7a] rounded-full flex items-center justify-center mx-auto mb-4">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold mb-3 text-balance">Welcome to Aria</h2>
+          <p className="text-sm text-muted-foreground mb-6 leading-relaxed text-pretty">
+            To provide you with the best experience, Daybreak Data needs your permission to access certain features.
+          </p>
+          <div className="bg-muted/50 rounded-xl p-4 mb-6 text-left space-y-3">
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-8 h-8 bg-[#208299]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-[#208299] text-lg">🔐</span>
+              </div>
+              <span>Store conversation history locally</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-8 h-8 bg-[#208299]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-[#208299] text-lg">⚙️</span>
+              </div>
+              <span>Save your preferences and settings</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              <div className="w-8 h-8 bg-[#208299]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-[#208299] text-lg">🤖</span>
+              </div>
+              <span>Connect to AI language models</span>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => handlePermissions(false)} className="flex-1">
+              Deny
+            </Button>
+            <Button onClick={() => handlePermissions(true)} className="flex-1 bg-[#208299] hover:bg-[#1a6b7a]">
+              Allow Access
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
+      {/* Fixed Header */}
+      <header className="flex-shrink-0 p-3 sm:p-4 border-b border-border/50 bg-card/95 backdrop-blur-xl flex items-center justify-between z-10">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => router.push("/history")}
+            className="h-9 w-9 sm:h-10 sm:w-10 p-0"
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-[#208299] to-[#1a6b7a] rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
+              <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="font-bold text-base sm:text-lg">ARIA</h1>
+              <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">
+                AI Assistant with Real-Time Web Access
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <Button size="sm" variant="ghost" onClick={createNewChat} className="h-9 sm:h-10 px-2 sm:px-3">
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => router.push("/settings")} className="h-9 sm:h-10 px-2 sm:px-3">
+            <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+          </Button>
+        </div>
+      </header>
+
+      {/* Scrollable Messages Area */}
+      <ScrollArea className="flex-1 overflow-y-auto">
+        <div className="p-3 sm:p-4 md:p-6">
+          <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+        <ScrollArea className="flex-1 p-2">
+          {chats.length === 0 ? (
+            <div className="p-4 text-center text-sm text-muted-foreground">
+              No conversations yet.
+              <br />
+              Start a new chat!
+            </div>
+          ) : (
+            chats.map((chat) => (
+              <button
+                key={chat.id}
+                onClick={() => {
+                  setActiveChat(chat.id)
+                  setSidebarOpen(false)
+                }}
+                className={cn(
+                  "w-full text-left p-3 rounded-lg mb-1 transition-all text-sm hover:bg-accent/50 group",
+                  activeChat === chat.id && "bg-accent",
+                )}
+              >
+                <div className="font-medium truncate">{chat.title}</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {chat.messages.length} {chat.messages.length === 1 ? "message" : "messages"}
+                </div>
+              </button>
+            ))
+          )}
+        </ScrollArea>
+        <div className="p-4 border-t border-border/50">
+          <Button variant="outline" onClick={() => router.push("/settings")} className="w-full">
+            <Settings className="w-4 h-4 mr-2" />
+            Settings
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col">
+        <header className="p-4 border-b border-border/50 bg-gradient-to-r from-[#208299]/10 via-[#1a6b7a]/5 to-transparent backdrop-blur-xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button size="sm" variant="ghost" onClick={() => setSidebarOpen(true)} className="md:hidden">
+              <Menu className="w-5 h-5" />
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#208299] to-[#1a6b7a] rounded-xl flex items-center justify-center shadow-lg">
+                <Globe className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="font-bold text-lg">ARIA</h1>
+                <p className="text-xs text-muted-foreground">AI Assistant with Real-Time Web Access</p>
+              </div>
+            </div>
+          </div>
+          <Button size="sm" variant="ghost" onClick={() => router.push("/settings")}>
+            <Settings className="w-5 h-5" />
+          </Button>
+        </header>
+
+        <ScrollArea className="flex-1 p-4 md:p-6">
+          <div className="max-w-4xl mx-auto space-y-6">
+            {currentChat?.messages.length === 0 && (
+              <div className="text-center py-8 sm:py-12">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-[#208299] to-[#1a6b7a] rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+                  <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                </div>
+                <h2 className="text-lg sm:text-2xl font-bold mb-2 text-balance">How can I help you today?</h2>
+                <p className="text-muted-foreground text-xs sm:text-sm text-pretty px-4">
+                  Ask me anything - I'll automatically search the web for real-time information when needed
+                </p>
+              </div>
+            )}
+
+            {currentChat?.messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={cn(
+                  "flex gap-2 sm:gap-4 animate-in slide-in-from-bottom-2 duration-300",
+                  msg.role === "user" ? "justify-end" : "justify-start",
+                )}
+              >
+                {msg.role === "assistant" && (
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-[#208299] to-[#1a6b7a] rounded-lg flex items-center justify-center flex-shrink-0 mt-1 shadow-md">
+                    <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                  </div>
+                )}
+                <div
+                  className={cn(
+                    "max-w-[80%] sm:max-w-[85%] md:max-w-[75%] rounded-xl sm:rounded-2xl group",
+                    msg.role === "user" && "bg-[#208299] text-white p-3 sm:p-4 shadow-md",
+                    msg.role === "assistant" && "bg-muted/50 p-3 sm:p-4",
+                    msg.role === "error" && "bg-destructive/10 text-destructive p-3 sm:p-4 border border-destructive/20",
+                  )}
+                >
+                  {msg.role === "assistant" ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          code({ node, className, children, ...props }) {
+                            const match = /language-(\w+)/.exec(className || "")
+                            const inline = !match
+                            return inline ? (
+                              <code
+                                className="bg-black/10 dark:bg-white/10 px-1.5 py-0.5 rounded text-sm font-mono"
+                                {...props}
+                              >
+                                {children}
+                              </code>
+                            ) : (
+                              <pre className="bg-zinc-950 text-zinc-100 rounded-lg p-4 overflow-x-auto !mt-2 !mb-2 border border-zinc-800">
+                                <code className="font-mono text-sm leading-relaxed" {...props}>
+                                  {children}
+                                </code>
+                              </pre>
+                            )
+                          },
+                          p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                          ul: ({ children }) => <ul className="mb-2 last:mb-0 space-y-1">{children}</ul>,
+                          ol: ({ children }) => <ol className="mb-2 last:mb-0 space-y-1">{children}</ol>,
+                          h1: ({ children }) => <h1 className="text-xl font-bold mb-2 mt-4 first:mt-0">{children}</h1>,
+                          h2: ({ children }) => <h2 className="text-lg font-bold mb-2 mt-3 first:mt-0">{children}</h2>,
+                          h3: ({ children }) => (
+                            <h3 className="text-base font-bold mb-2 mt-2 first:mt-0">{children}</h3>
+                          ),
+                          a: ({ children, href }) => (
+                            <a
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#208299] hover:underline"
+                            >
+                              {children}
+                            </a>
+                          ),
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                      {msg.webSearchResults && msg.webSearchResults.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-border/50">
+                          <div className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                            <Globe className="w-3 h-3" />
+                            Web Sources
+                          </div>
+                          <div className="space-y-2">
+                            {msg.webSearchResults.map((result, idx) => (
+                              <a
+                                key={idx}
+                                href={result.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block text-xs p-2 bg-background/50 rounded-lg hover:bg-background/80 transition-colors"
+                              >
+                                <div className="font-medium text-[#208299] line-clamp-1">{result.title}</div>
+                                <div className="text-muted-foreground line-clamp-1 mt-0.5">{result.snippet}</div>
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</div>
+                  )}
+
+                  {msg.role === "assistant" && (
+                    <div className="flex gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => copyMessage(msg.content)}
+                        className="h-7 px-2 text-xs"
+                      >
+                        <Copy className="w-3 h-3 mr-1" />
+                        Copy
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => regenerateMessage(msg.id)}
+                        className="h-7 px-2 text-xs"
+                      >
+                        <RotateCw className="w-3 h-3 mr-1" />
+                        Retry
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => downloadMessage(msg.content, msg.id)}
+                        className="h-7 px-2 text-xs"
+                        title={msg.downloadUrl ? "Download file" : "Generate and download file"}
+                      >
+                        <Download className="w-3 h-3 mr-1" />
+                        Download
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                {msg.role === "user" && (
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#208299]/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-[10px] sm:text-xs font-semibold text-[#208299]">You</span>
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {isSearching && (
+              <div className="flex justify-start gap-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#208299] to-[#1a6b7a] rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
+                  <Globe className="w-4 h-4 text-white animate-pulse" />
+                </div>
+                <div className="bg-muted/50 p-4 rounded-2xl">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 bg-[#208299] rounded-full animate-bounce" />
+                      <div className="w-2 h-2 bg-[#208299] rounded-full animate-bounce delay-100" />
+                      <div className="w-2 h-2 bg-[#208299] rounded-full animate-bounce delay-200" />
+                    </div>
+                    Searching the web for real-time information...
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {isLoading && !isSearching && (
+              <div className="flex justify-start gap-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#208299] to-[#1a6b7a] rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
+                  <Globe className="w-4 h-4 text-white animate-pulse" />
+                </div>
+                <div className="bg-muted/50 p-4 rounded-2xl">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 bg-[#208299] rounded-full animate-bounce" />
+                    <div className="w-2 h-2 bg-[#208299] rounded-full animate-bounce delay-100" />
+                    <div className="w-2 h-2 bg-[#208299] rounded-full animate-bounce delay-200" />
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
+      </ScrollArea>
+
+      {/* Fixed Input Area */}
+      <div className="flex-shrink-0 p-3 sm:p-4 border-t border-border/50 bg-card/95 backdrop-blur-xl safe-area-bottom">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex gap-2 items-end">
+            <Textarea
+              ref={textareaRef}
+              value={message}
+              onChange={handleTextareaChange}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault()
+                  sendMessage()
+                }
+              }}
+              placeholder="Ask me anything..."
+              className="resize-none min-h-[44px] max-h-[120px] sm:max-h-[200px] rounded-xl sm:rounded-2xl text-sm sm:text-base"
+              rows={1}
+              disabled={isLoading}
+            />
+            <Button
+              size="sm"
+              onClick={() => sendMessage()}
+              disabled={isLoading || !message.trim()}
+              className="h-11 w-11 sm:h-12 sm:w-12 p-0 bg-[#208299] hover:bg-[#1a6b7a] flex-shrink-0 rounded-xl"
+            >
+              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+            </Button>
+          </div>
+          <p className="text-[10px] sm:text-xs text-muted-foreground text-center mt-2 hidden sm:block">
+            Press Enter to send • Shift + Enter for new line • Real-time web search enabled
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
