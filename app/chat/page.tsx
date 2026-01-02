@@ -119,15 +119,30 @@ export default function ChatPage() {
       const response = await fetch('/api/chat/list')
       if (response.ok) {
         const data = await response.json()
-        const formattedChats: Chat[] = data.chats.map((chat: any) => ({
+        const serverChats: Chat[] = data.chats.map((chat: any) => ({
           id: chat.id,
           title: chat.title,
           messages: [], // Messages will be loaded when chat is selected
           createdAt: new Date(chat.created_at),
         }))
-        setChats(formattedChats)
-        if (formattedChats.length > 0 && !activeChat) {
-          const firstChatId = formattedChats[0].id
+
+        // Merge server chats with local chats, preferring server data but keeping local messages
+        setChats(prevChats => {
+          const mergedChats = serverChats.map(serverChat => {
+            const localChat = prevChats.find(c => c.id === serverChat.id)
+            return localChat ? { ...serverChat, messages: localChat.messages } : serverChat
+          })
+
+          // Add any local chats that aren't on the server yet (shouldn't happen with proper sync)
+          const localOnlyChats = prevChats.filter(localChat =>
+            !serverChats.some(serverChat => serverChat.id === localChat.id)
+          )
+
+          return [...mergedChats, ...localOnlyChats]
+        })
+
+        if (serverChats.length > 0 && !activeChat) {
+          const firstChatId = serverChats[0].id
           setActiveChat(firstChatId)
           // Load messages for the first chat
           loadChatMessages(firstChatId)
@@ -458,15 +473,10 @@ export default function ChatPage() {
 
       if (response.ok) {
         const data = await response.json()
-        const newChat: Chat = {
-          id: data.chat.id,
-          title: data.chat.title,
-          messages: [],
-          createdAt: new Date(data.chat.created_at),
-        }
-        const updatedChats = [newChat, ...chats]
-        setChats(updatedChats)
-        setActiveChat(newChat.id)
+        // Don't add to local state immediately - let it be added when first message is sent
+        // This prevents empty chats from appearing in history
+        setActiveChat(data.chat.id)
+        setMessage('') // Clear any existing message
       }
     } catch (error) {
       console.error('Error creating chat:', error)
@@ -496,13 +506,26 @@ export default function ChatPage() {
       timestamp: new Date(),
     }
 
-    setChats(prevChats =>
-      prevChats.map(chat =>
-        chat.id === activeChat
-          ? { ...chat, messages: [...chat.messages, userMessage] }
-          : chat
-      )
-    )
+    setChats(prevChats => {
+      const existingChat = prevChats.find(chat => chat.id === activeChat)
+      if (existingChat) {
+        // Update existing chat
+        return prevChats.map(chat =>
+          chat.id === activeChat
+            ? { ...chat, messages: [...chat.messages, userMessage] }
+            : chat
+        )
+      } else {
+        // Create new chat in local state (for newly created chats)
+        const newChat: Chat = {
+          id: activeChat,
+          title: 'New Chat',
+          messages: [userMessage],
+          createdAt: new Date(),
+        }
+        return [newChat, ...prevChats]
+      }
+    })
 
     try {
       // Get current settings
@@ -571,6 +594,19 @@ export default function ChatPage() {
       if (data.assistantMessage.webSearchResults) {
         setIsSearching(true)
         setTimeout(() => setIsSearching(false), 1000)
+      }
+
+      // Update chat title if this was the first message exchange
+      const currentChat = chats.find(c => c.id === activeChat)
+      if (currentChat && currentChat.messages.length === 1 && currentChat.title === 'New Chat') {
+        const newTitle = currentMessage.length > 50 ? currentMessage.substring(0, 50) + '...' : currentMessage
+        setChats(prevChats =>
+          prevChats.map(chat =>
+            chat.id === activeChat
+              ? { ...chat, title: newTitle }
+              : chat
+          )
+        )
       }
 
     } catch (error) {
@@ -713,7 +749,7 @@ export default function ChatPage() {
       )}>
         {/* Sidebar Header */}
         <div className="px-3 py-2 border-b border-border flex items-center justify-between">
-          <h2 className="font-semibold text-base">
+          <h2 className="font-semibold text-base" style={{ fontFamily: 'var(--menu-font-family)', fontSize: 'var(--menu-font-size)', color: 'var(--menu-font-color)' }}>
             {sidebarView === "history" ? "Chat History" : "Modes"}
           </h2>
           <Button
@@ -736,6 +772,7 @@ export default function ChatPage() {
                 ? "border-b-2 border-accent text-accent"
                 : "text-muted-foreground hover:text-foreground"
             )}
+            style={{ fontFamily: 'var(--menu-font-family)', fontSize: 'var(--menu-font-size)' }}
           >
             <History className="w-4 h-4 inline mr-2" />
             History
@@ -748,6 +785,7 @@ export default function ChatPage() {
                 ? "border-b-2 border-accent text-accent"
                 : "text-muted-foreground hover:text-foreground"
             )}
+            style={{ fontFamily: 'var(--menu-font-family)', fontSize: 'var(--menu-font-size)' }}
           >
             <Zap className="w-4 h-4 inline mr-2" />
             Modes
@@ -777,9 +815,10 @@ export default function ChatPage() {
                         ? "bg-accent/30"
                         : "hover:bg-muted/60"
                     )}
+                    style={{ fontFamily: 'var(--menu-font-family)', fontSize: 'var(--menu-font-size)' }}
                   >
-                    <div className="font-medium text-sm truncate group-hover:text-accent transition-colors">{chat.title}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
+                    <div className="font-medium text-sm truncate group-hover:text-accent transition-colors" style={{ color: 'var(--menu-font-color)' }}>{chat.title}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5" style={{ color: 'var(--system-font-color)' }}>
                       {chat.messages.length} messages
                     </div>
                   </button>
@@ -800,20 +839,20 @@ export default function ChatPage() {
                   )}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className={cn(
-                        "font-semibold text-sm transition-colors truncate",
-                        selectedMode === mode.id ? "text-foreground" : "text-foreground group-hover:text-accent"
-                      )}>
-                        {mode.name}
-                      </div>
-                      <div className={cn(
-                        "text-xs mt-0.5 transition-colors leading-tight",
-                        selectedMode === mode.id ? "text-foreground/70" : "text-muted-foreground group-hover:text-foreground/70"
-                      )}>
-                        {mode.description}
-                      </div>
+                  <div className="flex-1 min-w-0">
+                    <div className={cn(
+                      "font-semibold text-sm transition-colors truncate",
+                      selectedMode === mode.id ? "text-foreground" : "text-foreground group-hover:text-accent"
+                    )} style={{ fontFamily: 'var(--menu-font-family)', fontSize: 'var(--menu-font-size)', color: 'var(--menu-font-color)' }}>
+                      {mode.name}
                     </div>
+                    <div className={cn(
+                      "text-xs mt-0.5 transition-colors leading-tight",
+                      selectedMode === mode.id ? "text-foreground/70" : "text-muted-foreground group-hover:text-foreground/70"
+                    )} style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}>
+                      {mode.description}
+                    </div>
+                  </div>
                     {selectedMode === mode.id && (
                       <div className="ml-2 flex-shrink-0">
                         <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
@@ -836,6 +875,7 @@ export default function ChatPage() {
               setSidebarOpen(false)
             }}
             className="w-full justify-start h-8 text-sm"
+            style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}
           >
             <Settings className="w-3.5 h-3.5 mr-2" />
             Settings
@@ -845,6 +885,7 @@ export default function ChatPage() {
             variant="ghost"
             onClick={() => signOut({ callbackUrl: '/' })}
             className="w-full justify-start h-8 text-sm"
+            style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}
           >
             <LogOut className="w-3.5 h-3.5 mr-2" />
             <span>Sign Out</span>
@@ -880,8 +921,8 @@ export default function ChatPage() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="font-bold text-lg tracking-tight">ARIA</h1>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-gradient-to-r from-accent/20 to-accent/10 text-foreground font-semibold border border-accent/30 shadow-sm">
+                  <h1 className="font-bold text-lg tracking-tight" style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}>ARIA</h1>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-gradient-to-r from-accent/20 to-accent/10 text-foreground font-semibold border border-accent/30 shadow-sm" style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)' }}>
                     {getActiveMode().name}
                   </span>
                 </div>
@@ -908,8 +949,8 @@ export default function ChatPage() {
                 <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg" style={{ background: `linear-gradient(to bottom right, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
                   <Globe className="w-7 h-7 sm:w-9 sm:h-9 text-white" />
                 </div>
-                <h2 className="text-xl sm:text-3xl font-bold mb-3 text-balance">How can I help you today?</h2>
-                <p className="text-muted-foreground text-sm sm:text-base text-pretty px-6 max-w-md mx-auto leading-relaxed">
+                <h2 className="text-xl sm:text-3xl font-bold mb-3 text-balance" style={{ fontFamily: 'var(--chat-font-family)', fontSize: 'var(--chat-font-size)', color: 'var(--chat-font-color)' }}>How can I help you today?</h2>
+                <p className="text-muted-foreground text-sm sm:text-base text-pretty px-6 max-w-md mx-auto leading-relaxed" style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}>
                   Ask me anything - I'll automatically search the web for real-time information when needed
                 </p>
               </div>
@@ -941,7 +982,7 @@ export default function ChatPage() {
                   } : undefined}
                 >
                   {msg.role === "assistant" ? (
-                    <div className="text-sm break-words overflow-hidden">
+                    <div className="text-sm break-words overflow-hidden" style={{ fontFamily: 'var(--chat-font-family)', fontSize: 'var(--chat-font-size)', color: 'var(--chat-font-color)' }}>
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
@@ -1010,7 +1051,7 @@ export default function ChatPage() {
                       )}
                     </div>
                   ) : (
-                    <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div>
+                    <div className="text-sm leading-relaxed whitespace-pre-wrap break-words" style={{ fontFamily: 'var(--chat-font-family)', fontSize: 'var(--chat-font-size)', color: 'var(--chat-font-color)' }}>{msg.content}</div>
                   )}
 
                   {msg.role === "assistant" && (
@@ -1020,6 +1061,7 @@ export default function ChatPage() {
                         variant="ghost"
                         onClick={() => copyMessage(msg.content)}
                         className="h-7 px-2 text-xs"
+                        style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}
                       >
                         <Copy className="w-3 h-3 mr-1" />
                         Copy
@@ -1029,6 +1071,7 @@ export default function ChatPage() {
                         variant="ghost"
                         onClick={() => regenerateMessage(msg.id)}
                         className="h-7 px-2 text-xs"
+                        style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}
                       >
                         <RotateCw className="w-3 h-3 mr-1" />
                         Retry
@@ -1039,6 +1082,7 @@ export default function ChatPage() {
                         onClick={() => downloadMessage(msg.content, msg.id)}
                         className="h-7 px-2 text-xs"
                         title={msg.downloadUrl ? "Download file" : "Generate and download file"}
+                        style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}
                       >
                         <Download className="w-3 h-3 mr-1" />
                         Download

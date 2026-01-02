@@ -45,6 +45,17 @@
   --base-font-size: 16px;
   --accent-color: #208299;
   --user-message-color: #208299;
+
+  /* Font customization */
+  --menu-font-family: "Inter", sans-serif;
+  --menu-font-size: 14px;
+  --menu-font-color: #1e293b;
+  --chat-font-family: "Inter", sans-serif;
+  --chat-font-size: 14px;
+  --chat-font-color: #1e293b;
+  --system-font-family: "Inter", sans-serif;
+  --system-font-size: 14px;
+  --system-font-color: #64748b;
   
   filter: brightness(var(--light-brightness));
 }
