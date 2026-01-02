@@ -60,10 +60,10 @@ export function FileUploadButton({ onFileSelect, disabled }: FileUploadButtonPro
         size="sm"
         onClick={() => fileInputRef.current?.click()}
         disabled={disabled}
-        className="h-11 w-11 sm:h-12 sm:w-12 p-0 bg-background hover:bg-muted border-2 border-input flex-shrink-0 rounded-xl touch-manipulation text-foreground"
+        className="h-11 w-11 sm:h-12 sm:w-12 p-0 flex-shrink-0 rounded-xl touch-manipulation"
         title="Upload file"
       >
-        <Paperclip className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
+        <Paperclip className="w-4 h-4 sm:w-5 sm:h-5" />
       </Button>
     </>
   )

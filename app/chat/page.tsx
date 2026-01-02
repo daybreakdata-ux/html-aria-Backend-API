@@ -46,7 +46,7 @@ interface Mode {
   id: string
   name: string
   description: string
-  icon: string
+  icon?: string // Made optional since we're removing icons
   model?: string
   systemPrompt?: string
   temperature?: number
@@ -67,6 +67,7 @@ export default function ChatPage() {
   const [sidebarView, setSidebarView] = useState<"history" | "modes">("history")
   const [selectedMode, setSelectedMode] = useState<string>("default")
   const [isSpeaking, setIsSpeaking] = useState(false)
+  const [selectedVoice, setSelectedVoice] = useState<string>("default")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mediaRecorderRef = useRef<any>(null)
@@ -222,41 +223,35 @@ export default function ChatPage() {
       id: "default",
       name: "Default",
       description: "Balanced assistant for general tasks",
-      icon: "💬",
     },
     {
       id: "creative",
       name: "Creative",
       description: "Enhanced creativity for writing and brainstorming",
-      icon: "✨",
       temperature: 1.2,
     },
     {
       id: "precise",
       name: "Precise",
       description: "Focused and deterministic responses",
-      icon: "🎯",
       temperature: 0.3,
     },
     {
       id: "coder",
       name: "Coder",
       description: "Optimized for programming and technical tasks",
-      icon: "💻",
       systemPrompt: "You are an expert software engineer. Provide clear, concise code solutions with explanations.",
     },
     {
       id: "analyst",
       name: "Analyst",
       description: "Data analysis and research focused",
-      icon: "📊",
       systemPrompt: "You are a data analyst. Provide detailed analysis with insights and recommendations.",
     },
     {
       id: "voice",
       name: "Voice Chat",
       description: "Conversational AI with voice input and output",
-      icon: "🎤",
     },
   ]
 
@@ -270,6 +265,13 @@ export default function ChatPage() {
   const getActiveMode = () => {
     return modes.find(m => m.id === selectedMode) || modes[0]
   }
+
+  // Available voices for selection
+  const voiceOptions = [
+    { id: "default", name: "Default", description: "System default voice" },
+    { id: "female", name: "Female", description: "Female voice (if available)" },
+    { id: "male", name: "Male", description: "Male voice (if available)" },
+  ]
 
   // Text-to-Speech functionality
   const speakText = async (text: string) => {
@@ -293,16 +295,30 @@ export default function ChatPage() {
       utterance.pitch = 1.0
       utterance.volume = 1.0
 
-      // Try to use a female voice if available
+      // Select voice based on user preference
       const voices = window.speechSynthesis.getVoices()
-      const preferredVoice = voices.find(voice =>
-        voice.name.toLowerCase().includes('female') ||
-        voice.name.toLowerCase().includes('samantha') ||
-        voice.name.toLowerCase().includes('zira')
-      ) || voices[0]
+      let selectedVoiceObj = voices[0] // Default fallback
 
-      if (preferredVoice) {
-        utterance.voice = preferredVoice
+      if (selectedVoice === "female") {
+        selectedVoiceObj = voices.find(voice =>
+          voice.name.toLowerCase().includes('female') ||
+          voice.name.toLowerCase().includes('samantha') ||
+          voice.name.toLowerCase().includes('zira') ||
+          voice.name.toLowerCase().includes('susan') ||
+          voice.name.toLowerCase().includes('karen')
+        ) || voices.find(voice => voice.name.toLowerCase().includes('en') && !voice.name.toLowerCase().includes('male')) || voices[0]
+      } else if (selectedVoice === "male") {
+        selectedVoiceObj = voices.find(voice =>
+          voice.name.toLowerCase().includes('male') ||
+          voice.name.toLowerCase().includes('alex') ||
+          voice.name.toLowerCase().includes('daniel') ||
+          voice.name.toLowerCase().includes('fred')
+        ) || voices.find(voice => voice.name.toLowerCase().includes('en') && voice.name.toLowerCase().includes('male')) || voices[0]
+      }
+      // For "default", use voices[0]
+
+      if (selectedVoiceObj) {
+        utterance.voice = selectedVoiceObj
       }
 
       utterance.onstart = () => setIsSpeaking(true)
@@ -349,8 +365,11 @@ export default function ChatPage() {
       recognition.interimResults = true
       recognition.lang = "en-US"
 
+      let finalTranscript = ""
+
       recognition.onstart = () => {
         setIsRecording(true)
+        finalTranscript = ""
       }
 
       recognition.onresult = (event: any) => {
@@ -359,6 +378,7 @@ export default function ChatPage() {
           transcript += event.results[i][0].transcript
         }
         setMessage(transcript)
+        finalTranscript = transcript // Store the latest transcript
         if (textareaRef.current) {
           textareaRef.current.style.height = "auto"
           textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`
@@ -373,8 +393,9 @@ export default function ChatPage() {
       recognition.onend = () => {
         setIsRecording(false)
         // In voice chat mode, automatically send the message after recording
-        if (selectedMode === "voice" && message.trim()) {
-          setTimeout(() => sendMessage(), 500) // Small delay to ensure UI updates
+        if (selectedMode === "voice" && finalTranscript.trim()) {
+          setMessage(finalTranscript) // Ensure the message is set
+          setTimeout(() => sendMessage(), 100) // Smaller delay
         }
       }
 
@@ -467,6 +488,22 @@ export default function ChatPage() {
 
     setIsLoading(true)
 
+    // Immediately add user message to UI
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: currentMessage,
+      timestamp: new Date(),
+    }
+
+    setChats(prevChats =>
+      prevChats.map(chat =>
+        chat.id === activeChat
+          ? { ...chat, messages: [...chat.messages, userMessage] }
+          : chat
+      )
+    )
+
     try {
       // Get current settings
       const contextLength = Number(localStorage.getItem("aria_context_length")) || 15
@@ -508,27 +545,18 @@ export default function ChatPage() {
 
       const data = await response.json()
 
-      // Update the chat with new messages
+      // Add AI response to the chat (user message was already added above)
       setChats(prevChats =>
         prevChats.map(chat => {
           if (chat.id === activeChat) {
-            const newMessages = [
-              ...chat.messages,
-              {
-                id: data.userMessage.id.toString(),
-                role: data.userMessage.role,
-                content: data.userMessage.content,
-                timestamp: new Date(data.userMessage.timestamp),
-              },
-              {
-                id: data.assistantMessage.id.toString(),
-                role: data.assistantMessage.role,
-                content: data.assistantMessage.content,
-                timestamp: new Date(data.assistantMessage.timestamp),
-                webSearchResults: data.assistantMessage.webSearchResults,
-              },
-            ]
-            return { ...chat, messages: newMessages }
+            const aiMessage: Message = {
+              id: data.assistantMessage.id.toString(),
+              role: data.assistantMessage.role,
+              content: data.assistantMessage.content,
+              timestamp: new Date(data.assistantMessage.timestamp),
+              webSearchResults: data.assistantMessage.webSearchResults,
+            }
+            return { ...chat, messages: [...chat.messages, aiMessage] }
           }
           return chat
         })
@@ -548,6 +576,7 @@ export default function ChatPage() {
     } catch (error) {
       console.error("Error sending message:", error)
 
+      // Remove the optimistically added user message and add error message
       const errorMessage: Message = {
         id: Date.now().toString(),
         role: "error",
@@ -558,7 +587,13 @@ export default function ChatPage() {
       setChats(prevChats =>
         prevChats.map(chat =>
           chat.id === activeChat
-            ? { ...chat, messages: [...chat.messages, errorMessage] }
+            ? {
+                ...chat,
+                messages: [
+                  ...chat.messages.slice(0, -1), // Remove the last message (user message)
+                  errorMessage
+                ]
+              }
             : chat
         )
       )
@@ -758,22 +793,31 @@ export default function ChatPage() {
                   key={mode.id}
                   onClick={() => handleModeSelect(mode.id)}
                   className={cn(
-                    "w-full p-4 rounded-lg text-left transition-colors mb-2 border",
+                    "w-full p-4 rounded-xl text-left transition-all duration-200 mb-2 border-2 group",
                     selectedMode === mode.id
-                      ? "bg-accent/20 border-accent"
-                      : "border-border hover:bg-muted"
+                      ? "bg-gradient-to-r from-accent/20 to-accent/10 border-accent shadow-lg transform scale-[1.02]"
+                      : "border-border/50 hover:border-accent/50 hover:bg-muted/50 hover:shadow-md"
                   )}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{mode.icon}</span>
+                  <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <div className="font-medium text-sm">{mode.name}</div>
-                      <div className="text-xs text-muted-foreground mt-1">
+                      <div className={cn(
+                        "font-bold text-base transition-colors",
+                        selectedMode === mode.id ? "text-foreground" : "text-foreground group-hover:text-accent"
+                      )}>
+                        {mode.name}
+                      </div>
+                      <div className={cn(
+                        "text-xs mt-1 transition-colors",
+                        selectedMode === mode.id ? "text-foreground/80" : "text-muted-foreground group-hover:text-foreground/80"
+                      )}>
                         {mode.description}
                       </div>
                     </div>
                     {selectedMode === mode.id && (
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--accent-color)' }} />
+                      <div className="ml-3">
+                        <div className="w-3 h-3 rounded-full bg-accent animate-pulse" />
+                      </div>
                     )}
                   </div>
                 </button>
@@ -835,8 +879,8 @@ export default function ChatPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="font-bold text-base sm:text-lg">ARIA</h1>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent font-medium">
-                    {getActiveMode().icon} {getActiveMode().name}
+                  <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-accent/20 to-accent/10 text-foreground font-bold border border-accent/30 shadow-sm">
+                    {getActiveMode().name}
                   </span>
                 </div>
                 <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">
@@ -1076,6 +1120,22 @@ export default function ChatPage() {
                 )}
               </div>
 
+              {/* Voice Selection */}
+              <div className="flex justify-center gap-2">
+                {voiceOptions.map((voice) => (
+                  <Button
+                    key={voice.id}
+                    size="sm"
+                    variant={selectedVoice === voice.id ? "default" : "outline"}
+                    onClick={() => setSelectedVoice(voice.id)}
+                    className="text-xs"
+                    disabled={isSpeaking}
+                  >
+                    {voice.name}
+                  </Button>
+                ))}
+              </div>
+
               <div className="flex justify-center gap-4">
                 <Button
                   size="lg"
@@ -1118,7 +1178,7 @@ export default function ChatPage() {
               </div>
 
               <div className="text-center text-xs text-muted-foreground">
-                Tap the microphone to speak • AI will respond with voice
+                Select voice • Tap microphone to speak • AI responds with voice
               </div>
             </div>
           ) : (
@@ -1148,13 +1208,13 @@ export default function ChatPage() {
                   "h-11 w-11 sm:h-12 sm:w-12 p-0 flex-shrink-0 rounded-xl touch-manipulation",
                   isRecording
                     ? "bg-red-600 hover:bg-red-700 animate-pulse text-white"
-                    : "bg-background hover:bg-muted border-2 border-input text-foreground"
+                    : ""
                 )}
                 title={isRecording ? "Stop recording" : "Voice input"}
               >
                 <Mic className={cn(
                   "w-4 h-4 sm:w-5 sm:h-5",
-                  isRecording ? "text-white" : "text-foreground"
+                  isRecording ? "text-white" : ""
                 )} />
               </Button>
               <Button
