@@ -159,7 +159,8 @@ export default function SettingsPage() {
 
   // Helper function to get theme colors based on current mode
   const getThemeColors = (theme: typeof themes[0]) => {
-    return isDarkMode ? theme.colors.dark : theme.colors.light
+    // Default to light mode if systemTheme is undefined (during hydration)
+    return (systemTheme === 'dark' && theme.colors.dark) ? theme.colors.dark : theme.colors.light
   }
 
   useEffect(() => {
@@ -194,7 +195,7 @@ export default function SettingsPage() {
     setSystemFontColor(localStorage.getItem(`${themePrefix}system_font_color`) || themeColors.muted)
 
     setManualLocation(localStorage.getItem("aria_manual_location") || "")
-  }, [mounted, isDarkMode])
+  }, [mounted, systemTheme])
 
   // Apply CSS variables in real-time
   useEffect(() => {
@@ -423,7 +424,7 @@ export default function SettingsPage() {
                                 <span className="relative z-10 drop-shadow-md">Color Preview</span>
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
                               </div>
-                              <p className="text-sm font-medium" style={{ color: isDarkMode ? '#a1a1aa' : '#71717a' }}>
+                              <p className="text-sm font-medium text-muted-foreground">
                                 {theme.description}
                               </p>
                               <div className="mt-3 flex gap-2">
