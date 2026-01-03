@@ -340,29 +340,30 @@ export default function SettingsPage() {
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
-      <header className="flex-shrink-0 border-b border-border bg-card">
-        <div className="max-w-6xl mx-auto p-3 sm:p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => router.push("/chat")} className="px-2 sm:px-3">
-              <ArrowLeft className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Back</span>
-            </Button>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `linear-gradient(to bottom right, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
-                <Globe className="w-4.5 h-4.5 text-white" />
-              </div>
-              <h1 className="text-xl font-bold">Settings</h1>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button onClick={handleSave} className="px-3 text-sm [&:not(:disabled):hover]:opacity-80" style={{ backgroundColor: 'var(--accent-color)' }}>
-              <Save className="w-4 h-4 mr-2" />
-              Save Changes
-            </Button>
-          </div>
-        </div>
-      </header>
+      {/* Floating Buttons */}
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        onClick={() => router.push("/chat")} 
+        className="floating-button top-left h-10 w-10 sm:h-11 sm:w-11 p-0 shadow-lg"
+        title="Back to Chat"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </Button>
+      
+      <Button 
+        onClick={handleSave} 
+        className="floating-button top-right-2 px-4 h-10 sm:h-11 text-sm shadow-lg [&:not(:disabled):hover]:opacity-80" 
+        style={{ backgroundColor: 'var(--accent-color)' }}
+        title="Save Changes"
+      >
+        <Save className="w-4 h-4 sm:mr-2" />
+        <span className="hidden sm:inline">Save</span>
+      </Button>
+      
+      <div className="floating-button top-right">
+        <ThemeToggle />
+      </div>
 
       <div className="flex-1 overflow-hidden">
         <Tabs value={activeCategory} onValueChange={setActiveCategory} className="h-full flex flex-col">

@@ -221,4 +221,35 @@
   .prose td {
     @apply border border-border px-4 py-2;
   }
+
+  /* Floating Buttons */
+  .floating-button {
+    @apply fixed z-50 rounded-xl backdrop-blur-sm bg-background/80 border border-border/50 hover:bg-accent/90 transition-all duration-200;
+  }
+
+  .floating-button.top-left {
+    @apply top-4 left-4;
+  }
+
+  .floating-button.top-right {
+    @apply top-4 right-4;
+  }
+
+  .floating-button.top-right-2 {
+    @apply top-4 right-16;
+  }
+
+  @media (max-width: 640px) {
+    .floating-button.top-left {
+      @apply top-2 left-2;
+    }
+
+    .floating-button.top-right {
+      @apply top-2 right-2;
+    }
+
+    .floating-button.top-right-2 {
+      @apply top-2 right-12;
+    }
+  }
 }
