@@ -50,11 +50,11 @@ export default function HomePage() {
 
           <h1 className="text-5xl font-semibold tracking-tight md:text-6xl">ARIA</h1>
           <p className="mt-4 max-w-sm text-lg text-white/80">
-            Initializing your adaptive copilot. The experience will launch in a moment.
+            Warming up your personal AI companion. We will be ready in a moment.
           </p>
           <div className="mt-8 flex items-center gap-3 text-xs uppercase tracking-[0.32em] text-white/60">
             <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-sky-300" />
-            <span>Preparing Experience</span>
+            <span>Setting The Mood</span>
           </div>
         </div>
       </div>
@@ -84,26 +84,26 @@ export default function HomePage() {
             <div className="flex flex-col items-center space-y-10 text-center md:items-start md:text-left">
               <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-[11px] uppercase tracking-[0.4em] text-white/60">
                 <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-                Live Copilot Ready
+                Personal Companion Ready
               </div>
               <div className="space-y-6">
                 <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl">
-                  Your adaptive AI, styled like your favorite mobile apps.
+                  Your everyday AI assistant, always in your pocket.
                 </h1>
                 <p className="max-w-xl text-lg text-white/70">
-                  Glide through conversations, ambient insights, and proactive workflows with a polished interface built for instant focus.
+                  Stay on top of life admin, spontaneous plans, and curious questions with a calm interface made for instant clarity.
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center justify-center gap-3 md:justify-start">
                 <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70">
-                  Real-time search sync
+                  Smart daily check-ins
                 </div>
                 <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70">
-                  Adaptive memory lanes
+                  Gentle reminder nudges
                 </div>
                 <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70">
-                  Secure multi-device access
+                  Private conversations only
                 </div>
               </div>
 
@@ -113,9 +113,9 @@ export default function HomePage() {
                   size="lg"
                   className="h-14 rounded-full bg-sky-400 px-10 text-base font-semibold text-slate-950 shadow-lg shadow-sky-500/30 transition-transform hover:scale-[1.02] hover:bg-sky-300"
                 >
-                  Enter ARIA
+                  Start Chatting
                 </Button>
-                <span className="text-sm text-white/60">No setup required. Sign in with your workspace.</span>
+                <span className="text-sm text-white/60">Free to explore. Sign in to sync across devices.</span>
               </div>
             </div>
 
@@ -134,18 +134,18 @@ export default function HomePage() {
                 <div className="mt-8 space-y-6">
                   <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
                     <p className="text-sm text-white/60">Now</p>
-                    <p className="mt-2 text-base font-medium text-white">Summarizing your overnight updates</p>
-                    <p className="mt-2 text-sm text-white/60">Daily digest ready in chat</p>
+                    <p className="mt-2 text-base font-medium text-white">Morning notes waiting for you</p>
+                    <p className="mt-2 text-sm text-white/60">Weather, headlines, and mood boost in one tap</p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-sky-500/30 to-purple-500/30 p-4">
-                    <p className="text-sm text-white/70">Upcoming</p>
-                    <p className="mt-2 text-base font-medium text-white">Client sync in 21 minutes</p>
-                    <p className="mt-2 text-sm text-white/70">ARIA prepared agenda and action list</p>
+                    <p className="text-sm text-white/70">Later Today</p>
+                    <p className="mt-2 text-base font-medium text-white">Coffee with Alex at 9:30</p>
+                    <p className="mt-2 text-sm text-white/70">Route, reminders, and conversation starters ready</p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                     <p className="text-sm text-white/60">Reminder</p>
-                    <p className="mt-2 text-base font-medium text-white">Upload launch assets</p>
-                    <p className="mt-2 text-sm text-white/60">Quick drop support built-in</p>
+                    <p className="mt-2 text-base font-medium text-white">Pick up flowers before dinner</p>
+                    <p className="mt-2 text-sm text-white/60">Saved list and favorite shop noted</p>
                   </div>
                 </div>
 
@@ -154,7 +154,7 @@ export default function HomePage() {
                   size="lg"
                   className="mt-8 h-12 w-full rounded-full bg-white/90 text-slate-900 hover:bg-white"
                 >
-                  Open Workspace
+                  Start Chatting
                 </Button>
               </div>
             </div>
