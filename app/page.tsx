@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Globe } from "lucide-react"
+import { Sparkles, MessageSquare, Zap, Shield } from "lucide-react"
 
 export default function HomePage() {
   const [showSplash, setShowSplash] = useState(true)
@@ -12,11 +12,9 @@ export default function HomePage() {
   const { status } = useSession()
 
   useEffect(() => {
-    // Auto-hide splash after animation
     const timer = setTimeout(() => {
       setShowSplash(false)
-    }, 2500)
-
+    }, 2000)
     return () => clearTimeout(timer)
   }, [])
 
@@ -32,29 +30,26 @@ export default function HomePage() {
 
   if (showSplash) {
     return (
-      <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-sky-900 text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.3),transparent_58%)]" />
-        <div className="absolute -left-1/3 top-1/2 h-[520px] w-[520px] -translate-y-1/2 rounded-full bg-sky-500/25 blur-3xl" />
-        <div className="absolute -right-1/4 top-20 h-[440px] w-[440px] rounded-full bg-indigo-500/25 blur-3xl" />
-
-        <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center">
-          <div className="relative mb-12">
-            <div className="absolute -inset-[72px] rounded-[64px] border border-white/10" />
-            <div className="absolute -inset-[104px] rounded-[96px] border border-white/5" />
-            <div className="relative flex h-48 w-48 items-center justify-center rounded-[40px] border border-white/20 bg-white/10 backdrop-blur-2xl">
-              <div className="absolute inset-0 animate-[spin_8s_linear_infinite] rounded-[40px] border-2 border-white/10" />
-              <div className="absolute inset-6 animate-[spin_6s_linear_infinite] rounded-[28px] border border-white/5 opacity-70" />
-              <Globe className="h-16 w-16 text-white" />
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.15),transparent_50%)]" />
+        
+        <div className="relative z-10 flex flex-col items-center justify-center space-y-8 px-6 text-center">
+          <div className="relative">
+            <div className="absolute -inset-4 animate-pulse rounded-full bg-gradient-to-r from-emerald-500/20 via-sky-500/20 to-violet-500/20 blur-2xl" />
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 via-sky-400 to-violet-400 shadow-2xl shadow-sky-500/50">
+              <Sparkles className="h-12 w-12 animate-pulse text-white" strokeWidth={2.5} />
             </div>
           </div>
-
-          <h1 className="text-5xl font-semibold tracking-tight md:text-6xl">ARIA</h1>
-          <p className="mt-4 max-w-sm text-lg text-white/80">
-            Booting your real-time AI copilot. Perplexity speed with ChatGPT depth.
-          </p>
-          <div className="mt-8 flex items-center gap-3 text-xs uppercase tracking-[0.32em] text-white/60">
-            <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-sky-300" />
-            <span>Syncing Live Data</span>
+          
+          <div className="space-y-3">
+            <h1 className="bg-gradient-to-r from-emerald-400 via-sky-400 to-violet-400 bg-clip-text text-6xl font-bold tracking-tight text-transparent">
+              ARIA
+            </h1>
+            <div className="flex items-center justify-center gap-2">
+              <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-emerald-400" style={{ animationDelay: "0ms" }} />
+              <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-sky-400" style={{ animationDelay: "150ms" }} />
+              <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-violet-400" style={{ animationDelay: "300ms" }} />
+            </div>
           </div>
         </div>
       </div>
@@ -62,124 +57,116 @@ export default function HomePage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.28),transparent_60%)]" />
-      <div className="absolute -left-1/3 top-1/3 h-[520px] w-[520px] rounded-full bg-sky-500/15 blur-3xl" />
-      <div className="absolute -right-1/4 top-0 h-[420px] w-[420px] rounded-full bg-indigo-500/15 blur-3xl" />
-
-      <div className="relative z-10 flex min-h-screen flex-col">
-        <header className="flex items-center justify-between px-6 py-8 md:px-12">
-          <span className="text-lg font-semibold tracking-[0.32em] text-white/80">ARIA</span>
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.1),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(139,92,246,0.1),transparent_50%)]" />
+      
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-8">
+        <header className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-sky-400">
+              <Sparkles className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-xl font-bold text-white">ARIA</span>
+          </div>
           <Button
-            variant="outline"
-            className="border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+            variant="ghost"
+            className="text-white/70 hover:bg-white/10 hover:text-white"
             onClick={() => router.push("/auth/signin")}
           >
             Sign In
           </Button>
         </header>
 
-        <main className="flex flex-1 flex-col items-center justify-center px-6 pb-16 md:px-12">
-          <div className="grid w-full max-w-6xl items-center gap-16 md:grid-cols-[1.05fr,0.95fr]">
-            <div className="flex flex-col items-center space-y-10 text-center md:items-start md:text-left">
-              <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-[11px] uppercase tracking-[0.4em] text-white/60">
-                <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-                Real-Time Copilot Ready
-              </div>
-              <div className="space-y-6">
-                <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl">
-                  Answers like Perplexity. Conversations like ChatGPT.
-                </h1>
-                <p className="max-w-xl text-lg text-white/70">
-                  Ask anything, watch ARIA pull verified sources in real time, remember what matters, and stay private—no throttling, no censorship.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-center gap-3 md:justify-start">
-                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70">
-                  Live web + data sync
-                </div>
-                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70">
-                  Persistent personal memory
-                </div>
-                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70">
-                  Privacy-first, no censorship
-                </div>
-              </div>
-
-              <div className="flex flex-col items-center gap-4 md:flex-row md:items-center">
-                <Button
-                  onClick={handleGetStarted}
-                  size="lg"
-                  className="h-14 rounded-full bg-sky-400 px-10 text-base font-semibold text-slate-950 shadow-lg shadow-sky-500/30 transition-transform hover:scale-[1.02] hover:bg-sky-300"
-                >
-                  Launch ARIA
-                </Button>
-                <span className="text-sm text-white/60">Free preview. Sign in to unlock memory across devices.</span>
-              </div>
+        <main className="flex flex-1 flex-col items-center justify-center py-16 text-center">
+          <div className="mx-auto max-w-4xl space-y-8">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-400">
+              <Zap className="h-4 w-4" />
+              <span>Powered by real-time AI</span>
             </div>
 
-            <div className="relative flex justify-center">
-              <div className="absolute -inset-10 rounded-[40px] bg-white/5 blur-3xl" />
-              <div className="relative w-full max-w-sm rounded-[34px] border border-white/10 bg-gradient-to-br from-white/15 via-white/5 to-transparent p-6 shadow-[0_40px_120px_-40px_rgba(56,189,248,0.45)] backdrop-blur-2xl">
-                <div className="flex items-center justify-between text-xs text-white/50">
-                  <span>08:45</span>
-                  <div className="flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-white/40" />
-                    <span className="h-1.5 w-3 rounded-md bg-white/40" />
-                    <span className="h-1.5 w-2 rounded-md bg-white/40" />
-                  </div>
-                </div>
+            <h1 className="text-5xl font-bold leading-tight tracking-tight text-white sm:text-6xl md:text-7xl">
+              Instant answers,
+              <br />
+              <span className="bg-gradient-to-r from-emerald-400 via-sky-400 to-violet-400 bg-clip-text text-transparent">
+                lasting memory
+              </span>
+            </h1>
 
-                <div className="mt-8 space-y-6">
-                  <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                    <p className="text-sm text-white/60">Live Briefing</p>
-                    <p className="mt-2 text-base font-medium text-white">Markets dipping 1.4%. NASA confirms new launch window.</p>
-                    <p className="mt-2 text-sm text-white/60">Sources pinned with freshness timestamps.</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-sky-500/30 to-purple-500/30 p-4">
-                    <p className="text-sm text-white/70">Memory Lane</p>
-                    <p className="mt-2 text-base font-medium text-white">Pick up the "Moonlit Atlas" book you loved last month?</p>
-                    <p className="mt-2 text-sm text-white/70">Saved from your bookstore chat on Dec 12.</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-sm text-white/60">Unfiltered Answer</p>
-                    <p className="mt-2 text-base font-medium text-white">How do LLM guardrails work, really?</p>
-                    <p className="mt-2 text-sm text-white/60">ARIA: "Here is what the research actually says."</p>
-                  </div>
-                </div>
+            <p className="mx-auto max-w-2xl text-lg text-white/60 sm:text-xl">
+              Experience conversations that feel natural. ARIA combines the speed of modern search with the depth of advanced AI, all while keeping your data private.
+            </p>
 
-                <Button
-                  onClick={handleGetStarted}
-                  size="lg"
-                  className="mt-8 h-12 w-full rounded-full bg-white/90 text-slate-900 hover:bg-white"
-                >
-                  Launch ARIA
-                </Button>
+            <div className="flex flex-col items-center gap-4 pt-4 sm:flex-row sm:justify-center">
+              <Button
+                onClick={handleGetStarted}
+                size="lg"
+                className="h-14 rounded-full bg-gradient-to-r from-emerald-500 via-sky-500 to-violet-500 px-8 text-base font-semibold text-white shadow-2xl shadow-sky-500/50 transition-all hover:scale-105 hover:shadow-sky-500/70"
+              >
+                <MessageSquare className="mr-2 h-5 w-5" />
+                Start Chatting
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-14 rounded-full border-white/20 bg-white/5 px-8 text-base font-semibold text-white backdrop-blur-sm hover:bg-white/10"
+                onClick={() => router.push("/auth/signup")}
+              >
+                Create Account
+              </Button>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-6 pt-8 text-sm text-white/50">
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-emerald-400" />
+                <span>Privacy first</span>
               </div>
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-sky-400" />
+                <span>Lightning fast</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-violet-400" />
+                <span>Always learning</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mx-auto mt-20 grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all hover:border-emerald-500/30 hover:bg-white/10">
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5">
+                <MessageSquare className="h-6 w-6 text-emerald-400" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-white">Natural Conversations</h3>
+              <p className="text-sm text-white/60">
+                Chat naturally and watch ARIA understand context, remember details, and provide thoughtful responses.
+              </p>
+            </div>
+
+            <div className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all hover:border-sky-500/30 hover:bg-white/10">
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500/20 to-sky-500/5">
+                <Zap className="h-6 w-6 text-sky-400" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-white">Real-Time Knowledge</h3>
+              <p className="text-sm text-white/60">
+                Get instant answers backed by live web data and verified sources, updated in real time.
+              </p>
+            </div>
+
+            <div className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all hover:border-violet-500/30 hover:bg-white/10 sm:col-span-2 lg:col-span-1">
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-500/5">
+                <Shield className="h-6 w-6 text-violet-400" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-white">Your Privacy Matters</h3>
+              <p className="text-sm text-white/60">
+                Your conversations stay yours. No tracking, no selling data, just pure AI assistance.
+              </p>
             </div>
           </div>
         </main>
 
-        <footer className="relative mx-auto mb-10 mt-auto w-full max-w-md px-6">
-          <div className="flex items-center justify-between rounded-[26px] border border-white/10 bg-white/5 px-6 py-4 text-sm text-white/70 shadow-[0_20px_60px_-30px_rgba(56,189,248,0.6)] backdrop-blur-2xl">
-            <button className="flex flex-col items-center gap-1 text-white">
-              <span className="h-1.5 w-8 rounded-full bg-sky-400" />
-              <span>Chat</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 hover:text-white">
-              <span className="h-1.5 w-1.5 rounded-full bg-white/40" />
-              <span>Discover</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 hover:text-white">
-              <span className="h-1.5 w-1.5 rounded-full bg-white/40" />
-              <span>Memory</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 hover:text-white">
-              <span className="h-1.5 w-1.5 rounded-full bg-white/40" />
-              <span>Profile</span>
-            </button>
-          </div>
+        <footer className="py-8 text-center text-sm text-white/40">
+          <p>© 2026 ARIA. Your intelligent companion.</p>
         </footer>
       </div>
     </div>
