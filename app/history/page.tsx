@@ -52,32 +52,31 @@ export default function HistoryPage() {
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col">
-      {/* Fixed Header */}
-      <header className="sticky top-0 z-50 p-3 sm:p-4 border-b border-border/50 bg-card/95 backdrop-blur-xl">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Button size="sm" variant="ghost" onClick={() => router.push("/chat")} className="h-9 w-9 sm:h-10 sm:w-10 p-0">
-              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-            </Button>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-[#208299] to-[#1a6b7a] rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
-                <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="font-bold text-base sm:text-lg">Chat History</h1>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">{chats.length} conversations</p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <ThemeToggle />
-            <Button size="sm" onClick={createNewChat} className="bg-[#208299] hover:bg-[#1a6b7a] px-2 sm:px-3 text-xs sm:text-sm">
-              <Plus className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
-              <span className="hidden sm:inline">New Chat</span>
-            </Button>
-          </div>
-        </div>
-      </header>
+      {/* Floating Buttons */}
+      <Button 
+        size="sm" 
+        variant="ghost" 
+        onClick={() => router.push("/chat")} 
+        className="floating-button top-left h-10 w-10 sm:h-11 sm:w-11 p-0 shadow-lg"
+        title="Back to Chat"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </Button>
+      
+      <Button 
+        size="sm" 
+        onClick={createNewChat} 
+        className="floating-button top-right-2 px-4 h-10 sm:h-11 text-sm shadow-lg" 
+        style={{ backgroundColor: 'var(--accent-color)' }}
+        title="New Chat"
+      >
+        <Plus className="w-4 h-4 sm:mr-2" />
+        <span className="hidden sm:inline">New</span>
+      </Button>
+      
+      <div className="floating-button top-right">
+        <ThemeToggle />
+      </div>
 
       {/* Scrollable Content */}
       <ScrollArea className="flex-1">

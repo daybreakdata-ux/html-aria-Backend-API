@@ -904,41 +904,30 @@ export default function ChatPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Fixed Header */}
-        <header className="flex-shrink-0 px-4 py-3 border-b border-border/50 bg-card/95 backdrop-blur-xl flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setSidebarOpen(true)}
-              className="h-9 w-9 p-0 hover:bg-accent/10"
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center shadow-md" style={{ background: `linear-gradient(to bottom right, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
-                <Globe className="w-4.5 h-4.5 text-white" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-bold text-lg tracking-tight" style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}>ARIA</h1>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-gradient-to-r from-accent/20 to-accent/10 text-foreground font-semibold border border-accent/30 shadow-sm" style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)' }}>
-                    {getActiveMode().name}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground leading-tight">
-                  AI Assistant with Real-Time Web Access
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button size="sm" variant="ghost" onClick={createNewChat} className="h-9 px-3 hover:bg-accent/10">
-              <Plus className="w-4 h-4" />
-            </Button>
-          </div>
-        </header>
+        {/* Floating Buttons */}
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => setSidebarOpen(true)}
+          className="floating-button top-left h-10 w-10 sm:h-11 sm:w-11 p-0 hover:bg-accent/10 shadow-lg"
+          title="Menu"
+        >
+          <Menu className="w-5 h-5" />
+        </Button>
+        
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={createNewChat}
+          className="floating-button top-right-2 h-10 w-10 sm:h-11 sm:w-11 p-0 hover:bg-accent/10 shadow-lg"
+          title="New Chat"
+        >
+          <Plus className="w-5 h-5" />
+        </Button>
+        
+        <div className="floating-button top-right">
+          <ThemeToggle />
+        </div>
 
         {/* Scrollable Messages Area */}
         <ScrollArea className="flex-1 overflow-y-auto">
