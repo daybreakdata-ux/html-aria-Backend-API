@@ -159,6 +159,9 @@ export default function ChatPage() {
           setActiveChat(firstChatId)
           // Load messages for the first chat
           loadChatMessages(firstChatId)
+        } else if (serverChats.length === 0 && !activeChat) {
+          // No chats exist, create a new one automatically
+          createNewChat()
         }
       }
     } catch (error) {
