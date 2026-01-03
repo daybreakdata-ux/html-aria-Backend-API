@@ -1,5 +1,3 @@
-import { Globe } from "lucide-react"
-
 interface LogoProps {
   className?: string
   size?: number
@@ -7,8 +5,11 @@ interface LogoProps {
 
 export function Logo({ className = "", size = 24 }: LogoProps) {
   return (
-    <div className={`flex items-center justify-center ${className}`}>
-      <Globe size={size} className="text-current" />
-    </div>
+    <img
+      src="/High-quality_black_and_white_vector_ARIA_logo.png"
+      alt="ARIA Logo"
+      className={className}
+      style={{ width: size, height: size }}
+    />
   )
 }
