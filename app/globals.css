@@ -199,6 +199,21 @@
     @apply max-w-none;
   }
 
+  /* ARIA spinning globe */
+  .aria-globe-spin {
+    animation: aria-globe-spin 14s linear infinite;
+    transform-origin: center;
+  }
+
+  @keyframes aria-globe-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
   .prose pre {
     @apply bg-transparent p-0 m-0;
   }

@@ -6,6 +6,23 @@ import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Sparkles, MessageSquare, Zap, Shield } from "lucide-react"
 
+function SpinningGlobe({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`relative inline-flex items-center justify-center overflow-hidden rounded-full bg-[conic-gradient(from_220deg_at_50%_50%,rgba(34,197,94,1),rgba(59,130,246,1),rgba(129,140,248,1),rgba(45,212,191,1),rgba(34,197,94,1))] aria-globe-spin shadow-lg shadow-emerald-500/30 ${className}`}
+    >
+      <div className="absolute inset-[18%] rounded-full border border-emerald-200/40" />
+      <div className="absolute inset-[32%] rounded-full border border-emerald-200/25" />
+      <div className="absolute inset-[46%] rounded-full border border-emerald-200/15" />
+      <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-emerald-100/30" />
+      <div className="absolute left-1/4 top-0 h-full w-px bg-emerald-100/20" />
+      <div className="absolute left-3/4 top-0 h-full w-px bg-emerald-100/20" />
+      <div className="absolute bottom-1 right-2 h-3 w-3 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.9)]" />
+      <div className="absolute inset-[8%] rounded-full bg-[radial-gradient(circle_at_20%_0%,rgba(255,255,255,0.6),transparent_55%)]" />
+    </div>
+  )
+}
+
 export default function HomePage() {
   const [showSplash, setShowSplash] = useState(true)
   const router = useRouter()
@@ -36,9 +53,7 @@ export default function HomePage() {
         <div className="relative z-10 flex flex-col items-center justify-center space-y-8 px-6 text-center">
           <div className="relative">
             <div className="absolute -inset-4 animate-pulse rounded-full bg-gradient-to-r from-emerald-500/20 via-sky-500/20 to-violet-500/20 blur-2xl" />
-            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 via-sky-400 to-violet-400 shadow-2xl shadow-sky-500/50">
-              <Sparkles className="h-12 w-12 animate-pulse text-white" strokeWidth={2.5} />
-            </div>
+            <SpinningGlobe className="h-24 w-24 shadow-2xl shadow-sky-500/50" />
           </div>
           
           <div className="space-y-3">
@@ -64,9 +79,7 @@ export default function HomePage() {
       <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-8">
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-sky-400">
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
+            <SpinningGlobe className="h-8 w-8" />
             <span className="text-xl font-bold text-white">ARIA</span>
           </div>
           <Button
