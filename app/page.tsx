@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Globe } from "lucide-react"
+import { Logo } from "@/components/logo"
 
 export default function HomePage() {
   const [showSplash, setShowSplash] = useState(true)
@@ -38,7 +38,7 @@ export default function HomePage() {
             <Globe className="w-12 h-12 text-white" />
           </div>
           <h1 className="text-6xl md:text-7xl font-bold text-white mb-4 tracking-tight animate-in fade-in slide-in-from-bottom-4 duration-700">
-            ARIA
+            <Logo size={64} />
           </h1>
           <p className="text-white/90 text-lg md:text-xl mb-2 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
             AI Assistant with Real-Time Intelligence

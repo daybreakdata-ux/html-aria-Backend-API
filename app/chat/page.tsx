@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { PermissionsManager } from "@/components/permissions-manager"
 import { FileUploadButton } from "@/components/file-upload-button"
+import { Logo } from "@/components/logo"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { performWebSearch } from "@/app/actions/web-search"
@@ -773,6 +774,11 @@ export default function ChatPage() {
           updateUserLocation()
         }
       }} />
+      
+      {/* Top Center Logo */}
+      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+        <Logo size={32} />
+      </div>
       
       {/* Left Sidebar */}
       <div className={cn(
