@@ -75,7 +75,8 @@ BLOB_READ_WRITE_TOKEN=your_vercel_blob_token_here
 SERPAPI_KEY=your_serpapi_key_here
 
 # Required: OpenRouter API key (server-side only, not user-configurable)
-OPENROUTER_API_KEY="sk-or-v1-..."
+# Set in Vercel environment variables (see VERCEL_ENV_SETUP.md)
+# OPENROUTER_API_KEY=your_actual_api_key_here
 
 # Optional: Google Gemini API key (server-side only, used as fallback when OpenRouter fails)
 GOOGLE_API_KEY="your_google_api_key_here"
@@ -220,7 +221,6 @@ Content-Type: application/json
   "message": "Hello AI",
   "mode": "default",
   "contextLength": 15,
-  "apiKey": "sk-or-v1-...",
   "model": "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
   "systemPrompt": "You are a helpful assistant",
   "temperature": 0.7,

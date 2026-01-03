@@ -68,16 +68,32 @@ export default function ChatPage() {
   const [selectedMode, setSelectedMode] = useState<string>("default")
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [selectedVoice, setSelectedVoice] = useState<string>("default")
+  const [anonymousMessageCount, setAnonymousMessageCount] = useState<number>(0)
+  const [showAuthPrompt, setShowAuthPrompt] = useState<boolean>(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mediaRecorderRef = useRef<any>(null)
 
-  // Check authentication
+  // Load anonymous message count from localStorage
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin')
+    const savedCount = localStorage.getItem("aria_anonymous_messages")
+    if (savedCount) {
+      const count = parseInt(savedCount, 10)
+      setAnonymousMessageCount(count)
+      if (count >= 4 && status === 'unauthenticated') {
+        setShowAuthPrompt(true)
+      }
     }
-  }, [status, router])
+  }, [status])
+
+  // Reset anonymous count when user signs in
+  useEffect(() => {
+    if (status === 'authenticated') {
+      setAnonymousMessageCount(0)
+      setShowAuthPrompt(false)
+      localStorage.removeItem("aria_anonymous_messages")
+    }
+  }, [status])
 
   useEffect(() => {
     if (status !== 'authenticated') return
@@ -87,16 +103,13 @@ export default function ChatPage() {
     const lightBrightness = localStorage.getItem("aria_light_brightness") || "100"
     const darkBrightness = localStorage.getItem("aria_dark_brightness") || "100"
     const fontSize = localStorage.getItem("aria_font_size") || "16"
-    const accentColor = localStorage.getItem("aria_accent_color") || "#208299"
-    const userMessageColor = localStorage.getItem("aria_user_message_color") || "#208299"
 
     const root = document.documentElement
     root.style.setProperty("--chat-width", `${chatWidth}px`)
     root.style.setProperty("--light-brightness", `${lightBrightness}%`)
     root.style.setProperty("--dark-brightness", `${darkBrightness}%`)
     root.style.setProperty("--base-font-size", `${fontSize}px`)
-    root.style.setProperty("--accent-color", accentColor)
-    root.style.setProperty("--user-message-color", userMessageColor)
+    // Note: accent-color and user-message-color are now controlled by theme CSS variables
 
     // Load selected mode from localStorage
     const savedMode = localStorage.getItem("aria_selected_mode")
@@ -486,6 +499,14 @@ export default function ChatPage() {
   const sendMessage = async () => {
     if (!message.trim() || isLoading || !activeChat) return
 
+    // Check anonymous message limit
+    if (status === 'unauthenticated') {
+      if (anonymousMessageCount >= 4) {
+        setShowAuthPrompt(true)
+        return
+      }
+    }
+
     const currentMessage = message.trim()
     setMessage("")
 
@@ -607,6 +628,17 @@ export default function ChatPage() {
               : chat
           )
         )
+      }
+
+      // Update anonymous message count
+      if (status === 'unauthenticated') {
+        const newCount = anonymousMessageCount + 1
+        setAnonymousMessageCount(newCount)
+        localStorage.setItem("aria_anonymous_messages", newCount.toString())
+
+        if (newCount >= 4) {
+          setShowAuthPrompt(true)
+        }
       }
 
     } catch (error) {
@@ -744,13 +776,13 @@ export default function ChatPage() {
       
       {/* Left Sidebar */}
       <div className={cn(
-        "fixed left-0 top-0 h-full w-64 bg-card border-r border-border z-50 transition-transform duration-300 flex flex-col",
+        "fixed left-0 top-0 h-full w-80 sm:w-72 md:w-64 bg-card border-r border-border z-50 transition-transform duration-300 flex flex-col max-h-screen overflow-hidden",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         {/* Sidebar Header */}
         <div className="px-3 py-2 border-b border-border flex items-center justify-between">
           <h2 className="font-semibold text-base" style={{ fontFamily: 'var(--menu-font-family)', fontSize: 'var(--menu-font-size)', color: 'var(--menu-font-color)' }}>
-            {sidebarView === "history" ? "Chat History" : "Modes"}
+            {status === 'authenticated' ? (sidebarView === "history" ? "Chat History" : "Modes") : "Welcome"}
           </h2>
           <Button
             size="sm"
@@ -762,135 +794,184 @@ export default function ChatPage() {
           </Button>
         </div>
 
-        {/* Sidebar Menu Tabs */}
-        <div className="flex border-b border-border">
-          <button
-            onClick={() => setSidebarView("history")}
-            className={cn(
-              "flex-1 px-4 py-3 text-sm font-medium transition-colors",
-              sidebarView === "history"
-                ? "border-b-2 border-accent text-accent"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-            style={{ fontFamily: 'var(--menu-font-family)', fontSize: 'var(--menu-font-size)' }}
-          >
-            <History className="w-4 h-4 inline mr-2" />
-            History
-          </button>
-          <button
-            onClick={() => setSidebarView("modes")}
-            className={cn(
-              "flex-1 px-4 py-3 text-sm font-medium transition-colors",
-              sidebarView === "modes"
-                ? "border-b-2 border-accent text-accent"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-            style={{ fontFamily: 'var(--menu-font-family)', fontSize: 'var(--menu-font-size)' }}
-          >
-            <Zap className="w-4 h-4 inline mr-2" />
-            Modes
-          </button>
-        </div>
+        {/* Sidebar Menu Tabs - Only show for authenticated users */}
+        {status === 'authenticated' && (
+          <div className="flex border-b border-border">
+            <button
+              onClick={() => setSidebarView("history")}
+              className={cn(
+                "flex-1 px-4 py-4 sm:py-3 text-sm font-medium transition-colors min-h-[48px] sm:min-h-0",
+                sidebarView === "history"
+                  ? "border-b-2 border-accent text-accent"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+              style={{ fontFamily: 'var(--menu-font-family)', fontSize: 'var(--menu-font-size)' }}
+            >
+              <History className="w-4 h-4 inline mr-2" />
+              History
+            </button>
+            <button
+              onClick={() => setSidebarView("modes")}
+              className={cn(
+                "flex-1 px-4 py-4 sm:py-3 text-sm font-medium transition-colors min-h-[48px] sm:min-h-0",
+                sidebarView === "modes"
+                  ? "border-b-2 border-accent text-accent"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+              style={{ fontFamily: 'var(--menu-font-family)', fontSize: 'var(--menu-font-size)' }}
+            >
+              <Zap className="w-4 h-4 inline mr-2" />
+              Modes
+            </button>
+          </div>
+        )}
 
-        {/* Sidebar Content */}
-        <ScrollArea className="flex-1">
-          {sidebarView === "history" ? (
-            <div className="p-2">
-              {chats.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground text-sm">
-                  No chat history yet
+        {/* Sidebar Content - Scrollable area that doesn't include footer */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <ScrollArea className="flex-1">
+            {status === 'authenticated' ? (
+              sidebarView === "history" ? (
+                <div className="p-2">
+                  {chats.length === 0 ? (
+                    <div className="p-8 text-center text-muted-foreground text-sm">
+                      No chat history yet
+                    </div>
+                  ) : (
+                  chats.map((chat) => (
+                    <button
+                      key={chat.id}
+                      onClick={() => {
+                        setActiveChat(chat.id)
+                        loadChatMessages(chat.id)
+                        setSidebarOpen(false)
+                      }}
+                      className={cn(
+                        "w-full p-3 sm:p-2 rounded-md text-left transition-colors mb-1 group min-h-[44px] sm:min-h-0",
+                        activeChat === chat.id
+                          ? "bg-accent/30"
+                          : "hover:bg-muted/60"
+                      )}
+                      style={{ fontFamily: 'var(--menu-font-family)', fontSize: 'var(--menu-font-size)' }}
+                    >
+                        <div className="font-medium text-sm truncate group-hover:text-accent transition-colors" style={{ color: 'var(--menu-font-color)' }}>{chat.title}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5" style={{ color: 'var(--system-font-color)' }}>
+                          {chat.messages.length} messages
+                        </div>
+                      </button>
+                    ))
+                  )}
                 </div>
               ) : (
-                chats.map((chat) => (
-                  <button
-                    key={chat.id}
-                    onClick={() => {
-                      setActiveChat(chat.id)
-                      loadChatMessages(chat.id)
-                      setSidebarOpen(false)
-                    }}
-                    className={cn(
-                      "w-full p-2 rounded-md text-left transition-colors mb-1 group",
-                      activeChat === chat.id
-                        ? "bg-accent/30"
-                        : "hover:bg-muted/60"
-                    )}
-                    style={{ fontFamily: 'var(--menu-font-family)', fontSize: 'var(--menu-font-size)' }}
-                  >
-                    <div className="font-medium text-sm truncate group-hover:text-accent transition-colors" style={{ color: 'var(--menu-font-color)' }}>{chat.title}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5" style={{ color: 'var(--system-font-color)' }}>
-                      {chat.messages.length} messages
-                    </div>
-                  </button>
-                ))
-              )}
-            </div>
-          ) : (
-            <div className="p-2 space-y-2">
-              {modes.map((mode) => (
-                <button
-                  key={mode.id}
-                  onClick={() => handleModeSelect(mode.id)}
-                  className={cn(
-                    "w-full p-3 rounded-lg text-left transition-all duration-200 border group",
-                    selectedMode === mode.id
-                      ? "bg-gradient-to-r from-accent/15 to-accent/8 border-accent shadow-md transform scale-[1.01]"
-                      : "border-border/40 hover:border-accent/40 hover:bg-muted/40 hover:shadow-sm"
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className={cn(
-                      "font-semibold text-sm transition-colors truncate",
-                      selectedMode === mode.id ? "text-foreground" : "text-foreground group-hover:text-accent"
-                    )} style={{ fontFamily: 'var(--menu-font-family)', fontSize: 'var(--menu-font-size)', color: 'var(--menu-font-color)' }}>
-                      {mode.name}
-                    </div>
-                    <div className={cn(
-                      "text-xs mt-0.5 transition-colors leading-tight",
-                      selectedMode === mode.id ? "text-foreground/70" : "text-muted-foreground group-hover:text-foreground/70"
-                    )} style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}>
-                      {mode.description}
-                    </div>
-                  </div>
-                    {selectedMode === mode.id && (
-                      <div className="ml-2 flex-shrink-0">
-                        <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                <div className="p-2 space-y-2">
+                  {modes.map((mode) => (
+                    <button
+                      key={mode.id}
+                      onClick={() => handleModeSelect(mode.id)}
+                      className={cn(
+                        "w-full p-4 sm:p-3 rounded-lg text-left transition-all duration-200 border group min-h-[60px] sm:min-h-0",
+                        selectedMode === mode.id
+                          ? "bg-gradient-to-r from-accent/15 to-accent/8 border-accent shadow-md transform scale-[1.01]"
+                          : "border-border/40 hover:border-accent/40 hover:bg-muted/40 hover:shadow-sm"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className={cn(
+                          "font-semibold text-sm transition-colors truncate",
+                          selectedMode === mode.id ? "text-foreground" : "text-foreground group-hover:text-accent"
+                        )} style={{ fontFamily: 'var(--menu-font-family)', fontSize: 'var(--menu-font-size)', color: 'var(--menu-font-color)' }}>
+                          {mode.name}
+                        </div>
+                        <div className={cn(
+                          "text-xs mt-0.5 transition-colors leading-tight",
+                          selectedMode === mode.id ? "text-foreground/70" : "text-muted-foreground group-hover:text-foreground/70"
+                        )} style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}>
+                          {mode.description}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </ScrollArea>
+                        {selectedMode === mode.id && (
+                          <div className="ml-2 flex-shrink-0">
+                            <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )
+            ) : (
+              <div className="p-8 text-center">
+                <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Globe className="w-6 h-6 text-accent" />
+                </div>
+                <h3 className="font-semibold text-sm mb-2">Welcome to ARIA</h3>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Try ARIA with {4 - anonymousMessageCount} free messages, then join to continue.
+                </p>
+                <div className="space-y-2">
+                  <Button
+                    onClick={() => router.push('/auth/signup')}
+                    size="sm"
+                    className="w-full"
+                  >
+                    Sign Up
+                  </Button>
+                  <Button
+                    onClick={() => router.push('/auth/signin')}
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Sign In
+                  </Button>
+                </div>
+              </div>
+            )}
+          </ScrollArea>
 
-        {/* Sidebar Footer with Settings and Sign Out */}
-        <div className="px-3 py-2 border-t border-border space-y-1">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => {
-              router.push("/settings")
-              setSidebarOpen(false)
-            }}
-            className="w-full justify-start h-8 text-sm"
-            style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}
-          >
-            <Settings className="w-3.5 h-3.5 mr-2" />
-            Settings
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => signOut({ callbackUrl: '/' })}
-            className="w-full justify-start h-8 text-sm"
-            style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}
-          >
-            <LogOut className="w-3.5 h-3.5 mr-2" />
-            <span>Sign Out</span>
-          </Button>
-          <p className="text-xs text-muted-foreground text-center mt-1">sign-out</p>
+          {/* Sidebar Footer - Always visible at bottom */}
+          <div className="flex-shrink-0 px-3 py-2 border-t border-border space-y-1 bg-card">
+            {status === 'authenticated' ? (
+              <>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    router.push("/settings")
+                    setSidebarOpen(false)
+                  }}
+                  className="w-full justify-start h-8 text-sm"
+                  style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}
+                >
+                  <Settings className="w-3.5 h-3.5 mr-2" />
+                  Settings
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="w-full justify-start h-8 text-sm"
+                  style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}
+                >
+                  <LogOut className="w-3.5 h-3.5 mr-2" />
+                  <span>Sign Out</span>
+                </Button>
+                <p className="text-xs text-muted-foreground text-center mt-1">sign-out</p>
+              </>
+            ) : (
+              <div className="text-center space-y-2">
+                <div className="text-xs text-muted-foreground">
+                  Messages used: {anonymousMessageCount}/4
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div
+                    className="bg-accent h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${(anonymousMessageCount / 4) * 100}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -1124,6 +1205,46 @@ export default function ChatPage() {
         </div>
         </ScrollArea>
 
+        {/* Auth Prompt */}
+        {showAuthPrompt && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-card border border-border rounded-xl p-6 max-w-md w-full mx-4">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="w-6 h-6 text-accent" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Join ARIA to Continue</h3>
+                <p className="text-muted-foreground text-sm mb-6">
+                  You've reached the limit of 4 free messages. Create an account to continue chatting with ARIA.
+                </p>
+                <div className="space-y-3">
+                  <Button
+                    onClick={() => router.push('/auth/signup')}
+                    className="w-full"
+                  >
+                    Sign Up
+                  </Button>
+                  <Button
+                    onClick={() => router.push('/auth/signin')}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Sign In
+                  </Button>
+                </div>
+                <Button
+                  onClick={() => setShowAuthPrompt(false)}
+                  variant="ghost"
+                  size="sm"
+                  className="mt-4 text-xs text-muted-foreground"
+                >
+                  Maybe Later
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Input Area */}
         <div className="flex-shrink-0 px-4 py-3 border-t border-border/50 bg-card/95 backdrop-blur-xl pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:pb-[env(safe-area-inset-bottom)]">
           <div className="mx-auto" style={{ maxWidth: 'var(--chat-width, 800px)' }}>
@@ -1144,7 +1265,7 @@ export default function ChatPage() {
             </div>
           )}
           {/* Voice Chat Mode */}
-          {selectedMode === "voice" ? (
+          {selectedMode === "voice" && status === 'authenticated' ? (
             <div className="space-y-4">
               <div className="text-center">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent/20 text-accent rounded-full text-sm">
@@ -1222,7 +1343,10 @@ export default function ChatPage() {
           ) : (
             /* Text Chat Mode */
             <div className="flex gap-2 items-end">
-              <FileUploadButton onFileSelect={handleFileUpload} disabled={isLoading} />
+              <FileUploadButton
+                onFileSelect={handleFileUpload}
+                disabled={isLoading || (status === 'unauthenticated' && anonymousMessageCount >= 4)}
+              />
               <Textarea
                 ref={textareaRef}
                 value={message}
@@ -1233,15 +1357,19 @@ export default function ChatPage() {
                     sendMessage()
                   }
                 }}
-                placeholder="Ask me anything..."
+                placeholder={
+                  status === 'unauthenticated' && anonymousMessageCount >= 4
+                    ? "Join ARIA to continue chatting..."
+                    : "Ask me anything..."
+                }
                 className="resize-none min-h-[44px] max-h-[120px] sm:max-h-[200px] rounded-xl sm:rounded-2xl text-sm sm:text-base touch-manipulation"
                 rows={1}
-                disabled={isLoading}
+                disabled={isLoading || (status === 'unauthenticated' && anonymousMessageCount >= 4)}
               />
               <Button
                 size="sm"
                 onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                disabled={isLoading}
+                disabled={isLoading || (status === 'unauthenticated' && anonymousMessageCount >= 4)}
                 className={cn(
                   "h-11 w-11 sm:h-12 sm:w-12 p-0 flex-shrink-0 rounded-xl touch-manipulation",
                   isRecording
@@ -1258,7 +1386,11 @@ export default function ChatPage() {
               <Button
                 size="sm"
                 onClick={() => sendMessage()}
-                disabled={isLoading || !message.trim()}
+                disabled={
+                  isLoading ||
+                  !message.trim() ||
+                  (status === 'unauthenticated' && anonymousMessageCount >= 4)
+                }
                 className="h-11 w-11 sm:h-12 sm:w-12 p-0 flex-shrink-0 rounded-xl touch-manipulation [&:not(:disabled):hover]:opacity-80"
                 style={{ backgroundColor: 'var(--accent-color)' }}
               >
@@ -1267,10 +1399,13 @@ export default function ChatPage() {
             </div>
           )}
           <p className="text-[10px] sm:text-xs text-muted-foreground text-center mt-2 hidden sm:block">
-            {selectedMode === "voice"
-              ? "Voice chat mode • Speak naturally • AI responds with voice"
-              : "Press Enter to send • Shift + Enter for new line • Upload files • Voice input • Location-aware"
-            }
+            {status === 'unauthenticated' ? (
+              `Anonymous mode • ${4 - anonymousMessageCount} messages remaining • Join to continue`
+            ) : selectedMode === "voice" ? (
+              "Voice chat mode • Speak naturally • AI responds with voice"
+            ) : (
+              "Press Enter to send • Shift + Enter for new line • Upload files • Voice input • Location-aware"
+            )}
           </p>
         </div>
         </div>

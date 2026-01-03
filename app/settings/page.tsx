@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,141 +12,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, Save, Globe, Palette, Cpu, Settings, User, Monitor, Type, Droplet } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
 
-// Theme definitions
-const themes = [
-  {
-    id: "ocean",
-    name: "Ocean Blue",
-    description: "Calming blue tones inspired by the ocean",
-    colors: {
-      accent: "#208299",
-      userMessage: "#1e6b7a",
-      background: "#f8fafc",
-      surface: "#ffffff",
-      text: "#1e293b",
-      muted: "#64748b"
-    }
+// Default theme colors (system preference based)
+const defaultThemeColors = {
+  light: {
+    accent: "#0284c7",
+    userMessage: "#0369a1",
+    background: "#f0f9ff",
+    surface: "#ffffff",
+    text: "#0c4a6e",
+    muted: "#475569"
   },
-  {
-    id: "forest",
-    name: "Forest Green",
-    description: "Natural green palette for a fresh feel",
-    colors: {
-      accent: "#059669",
-      userMessage: "#047857",
-      background: "#f0fdf4",
-      surface: "#ffffff",
-      text: "#14532d",
-      muted: "#16a34a"
-    }
-  },
-  {
-    id: "sunset",
-    name: "Sunset Orange",
-    description: "Warm orange and pink tones",
-    colors: {
-      accent: "#ea580c",
-      userMessage: "#dc2626",
-      background: "#fff7ed",
-      surface: "#ffffff",
-      text: "#9a3412",
-      muted: "#fb923c"
-    }
-  },
-  {
-    id: "midnight",
-    name: "Midnight Purple",
-    description: "Deep purple and blue for night owls",
-    colors: {
-      accent: "#7c3aed",
-      userMessage: "#6d28d9",
-      background: "#faf5ff",
-      surface: "#ffffff",
-      text: "#581c87",
-      muted: "#a78bfa"
-    }
-  },
-  {
-    id: "rose",
-    name: "Rose Pink",
-    description: "Soft pink and rose tones",
-    colors: {
-      accent: "#db2777",
-      userMessage: "#be185d",
-      background: "#fdf2f8",
-      surface: "#ffffff",
-      text: "#831843",
-      muted: "#f472b6"
-    }
-  },
-  {
-    id: "amber",
-    name: "Amber Gold",
-    description: "Warm gold and amber tones",
-    colors: {
-      accent: "#d97706",
-      userMessage: "#b45309",
-      background: "#fffbeb",
-      surface: "#ffffff",
-      text: "#92400e",
-      muted: "#f59e0b"
-    }
-  },
-  {
-    id: "slate",
-    name: "Slate Gray",
-    description: "Modern gray and blue-gray palette",
-    colors: {
-      accent: "#475569",
-      userMessage: "#334155",
-      background: "#f8fafc",
-      surface: "#ffffff",
-      text: "#1e293b",
-      muted: "#64748b"
-    }
-  },
-  {
-    id: "emerald",
-    name: "Emerald",
-    description: "Rich emerald and teal combination",
-    colors: {
-      accent: "#065f46",
-      userMessage: "#064e3b",
-      background: "#ecfdf5",
-      surface: "#ffffff",
-      text: "#022c22",
-      muted: "#10b981"
-    }
-  },
-  {
-    id: "indigo",
-    name: "Indigo",
-    description: "Deep indigo and navy blue",
-    colors: {
-      accent: "#312e81",
-      userMessage: "#1e1b4b",
-      background: "#eef2ff",
-      surface: "#ffffff",
-      text: "#1e1b4b",
-      muted: "#6366f1"
-    }
-  },
-  {
-    id: "coral",
-    name: "Coral",
-    description: "Vibrant coral and orange tones",
-    colors: {
-      accent: "#dc2626",
-      userMessage: "#b91c1c",
-      background: "#fef2f2",
-      surface: "#ffffff",
-      text: "#991b1b",
-      muted: "#f87171"
-    }
+  dark: {
+    accent: "#38bdf8",
+    userMessage: "#0ea5e9",
+    background: "#0c1821",
+    surface: "#1e293b",
+    text: "#e0f2fe",
+    muted: "#94a3b8"
   }
-]
+}
 
 // Font families
 const fontFamilies = [
@@ -161,6 +48,8 @@ const fontFamilies = [
 
 export default function SettingsPage() {
   const router = useRouter()
+  const { theme: systemTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
   const [activeCategory, setActiveCategory] = useState("appearance")
 
   // UI Settings
@@ -169,8 +58,6 @@ export default function SettingsPage() {
   const [darkModeBrightness, setDarkModeBrightness] = useState(100)
 
   // Theme and Appearance
-  const [selectedTheme, setSelectedTheme] = useState("ocean")
-  const [currentTheme, setCurrentTheme] = useState(themes[0])
   const [menuFontFamily, setMenuFontFamily] = useState("Inter, sans-serif")
   const [menuFontSize, setMenuFontSize] = useState(14)
   const [menuFontColor, setMenuFontColor] = useState("#1e293b")
@@ -189,37 +76,47 @@ export default function SettingsPage() {
   const logoTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const logoIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Get the current mode (light or dark)
+  const isDarkMode = systemTheme === 'dark'
+
+  // Helper function to get default theme colors based on current mode
+  const getThemeColors = () => {
+    // Default to light mode if systemTheme is undefined (during hydration)
+    return systemTheme === 'dark' ? defaultThemeColors.dark : defaultThemeColors.light
+  }
+
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+
     // Load UI settings from localStorage
     setChatBoxWidth(Number(localStorage.getItem("aria_chat_width")) || 768)
     setLightModeBrightness(Number(localStorage.getItem("aria_light_brightness")) || 100)
     setDarkModeBrightness(Number(localStorage.getItem("aria_dark_brightness")) || 100)
 
-    // Load theme settings
-    const savedTheme = localStorage.getItem("aria_theme") || "ocean"
-    setSelectedTheme(savedTheme)
-    const theme = themes.find(t => t.id === savedTheme) || themes[0]
-    setCurrentTheme(theme)
-
-    // Load font settings for current theme
-    const themePrefix = `aria_theme_${savedTheme}_`
-    setMenuFontFamily(localStorage.getItem(`${themePrefix}menu_font_family`) || "Inter, sans-serif")
-    setMenuFontSize(Number(localStorage.getItem(`${themePrefix}menu_font_size`)) || 14)
-    setMenuFontColor(localStorage.getItem(`${themePrefix}menu_font_color`) || theme.colors.text)
-    setChatFontFamily(localStorage.getItem(`${themePrefix}chat_font_family`) || "Inter, sans-serif")
-    setChatFontSize(Number(localStorage.getItem(`${themePrefix}chat_font_size`)) || 14)
-    setChatFontColor(localStorage.getItem(`${themePrefix}chat_font_color`) || theme.colors.text)
-    setSystemFontFamily(localStorage.getItem(`${themePrefix}system_font_family`) || "Inter, sans-serif")
-    setSystemFontSize(Number(localStorage.getItem(`${themePrefix}system_font_size`)) || 14)
-    setSystemFontColor(localStorage.getItem(`${themePrefix}system_font_color`) || theme.colors.muted)
+    // Load font settings (theme follows system preference)
+    const themeColors = getThemeColors()
+    const fontPrefix = `aria_font_`
+    setMenuFontFamily(localStorage.getItem(`${fontPrefix}menu_font_family`) || "Inter, sans-serif")
+    setMenuFontSize(Number(localStorage.getItem(`${fontPrefix}menu_font_size`)) || 14)
+    setMenuFontColor(localStorage.getItem(`${fontPrefix}menu_font_color`) || themeColors.text)
+    setChatFontFamily(localStorage.getItem(`${fontPrefix}chat_font_family`) || "Inter, sans-serif")
+    setChatFontSize(Number(localStorage.getItem(`${fontPrefix}chat_font_size`)) || 14)
+    setChatFontColor(localStorage.getItem(`${fontPrefix}chat_font_color`) || themeColors.text)
+    setSystemFontFamily(localStorage.getItem(`${fontPrefix}system_font_family`) || "Inter, sans-serif")
+    setSystemFontSize(Number(localStorage.getItem(`${fontPrefix}system_font_size`)) || 14)
+    setSystemFontColor(localStorage.getItem(`${fontPrefix}system_font_color`) || themeColors.muted)
 
     setManualLocation(localStorage.getItem("aria_manual_location") || "")
-  }, [])
+  }, [mounted, systemTheme])
 
   // Apply CSS variables in real-time
   useEffect(() => {
     applyCSSVariables()
-  }, [chatBoxWidth, lightModeBrightness, darkModeBrightness, currentTheme, menuFontFamily, menuFontSize, menuFontColor, chatFontFamily, chatFontSize, chatFontColor, systemFontFamily, systemFontSize, systemFontColor])
+  }, [chatBoxWidth, lightModeBrightness, darkModeBrightness, menuFontFamily, menuFontSize, menuFontColor, chatFontFamily, chatFontSize, chatFontColor, systemFontFamily, systemFontSize, systemFontColor, systemTheme])
 
   const applyCSSVariables = () => {
     const root = document.documentElement
@@ -227,9 +124,10 @@ export default function SettingsPage() {
     root.style.setProperty("--light-brightness", `${lightModeBrightness}%`)
     root.style.setProperty("--dark-brightness", `${darkModeBrightness}%`)
 
-    // Apply theme colors
-    root.style.setProperty("--accent-color", currentTheme.colors.accent)
-    root.style.setProperty("--user-message-color", currentTheme.colors.userMessage)
+    // Apply theme colors based on current mode
+    const themeColors = getThemeColors()
+    root.style.setProperty("--accent-color", themeColors.accent)
+    root.style.setProperty("--user-message-color", themeColors.userMessage)
 
     // Apply font settings
     root.style.setProperty("--menu-font-family", menuFontFamily)
@@ -243,31 +141,6 @@ export default function SettingsPage() {
     root.style.setProperty("--system-font-color", systemFontColor)
   }
 
-  const handleThemeChange = (themeId: string) => {
-    const theme = themes.find(t => t.id === themeId)
-    if (theme) {
-      setSelectedTheme(themeId)
-      setCurrentTheme(theme)
-
-      // Load or set default font settings for the new theme
-      const themePrefix = `aria_theme_${themeId}_`
-      const savedMenuFamily = localStorage.getItem(`${themePrefix}menu_font_family`)
-      const savedChatFamily = localStorage.getItem(`${themePrefix}chat_font_family`)
-      const savedSystemFamily = localStorage.getItem(`${themePrefix}system_font_family`)
-
-      setMenuFontFamily(savedMenuFamily || "Inter, sans-serif")
-      setMenuFontSize(Number(localStorage.getItem(`${themePrefix}menu_font_size`)) || 14)
-      setMenuFontColor(localStorage.getItem(`${themePrefix}menu_font_color`) || theme.colors.text)
-
-      setChatFontFamily(savedChatFamily || "Inter, sans-serif")
-      setChatFontSize(Number(localStorage.getItem(`${themePrefix}chat_font_size`)) || 14)
-      setChatFontColor(localStorage.getItem(`${themePrefix}chat_font_color`) || theme.colors.text)
-
-      setSystemFontFamily(savedSystemFamily || "Inter, sans-serif")
-      setSystemFontSize(Number(localStorage.getItem(`${themePrefix}system_font_size`)) || 14)
-      setSystemFontColor(localStorage.getItem(`${themePrefix}system_font_color`) || theme.colors.muted)
-    }
-  }
 
   const handleSave = () => {
     // Save UI settings
@@ -275,11 +148,8 @@ export default function SettingsPage() {
     localStorage.setItem("aria_light_brightness", lightModeBrightness.toString())
     localStorage.setItem("aria_dark_brightness", darkModeBrightness.toString())
 
-    // Save theme
-    localStorage.setItem("aria_theme", selectedTheme)
-
-    // Save font settings for current theme
-    const themePrefix = `aria_theme_${selectedTheme}_`
+    // Save font settings (theme follows system preference)
+    const themePrefix = `aria_font_`
     localStorage.setItem(`${themePrefix}menu_font_family`, menuFontFamily)
     localStorage.setItem(`${themePrefix}menu_font_size`, menuFontSize.toString())
     localStorage.setItem(`${themePrefix}menu_font_color`, menuFontColor)
@@ -324,10 +194,58 @@ export default function SettingsPage() {
     setHoldProgress(0)
   }
 
-  const handleClearHistory = () => {
+  const handleClearHistory = async () => {
     if (confirm("Are you sure you want to clear all chat history? This cannot be undone.")) {
-      localStorage.removeItem("aria_chats")
-      alert("Chat history cleared successfully!")
+      try {
+        // Clear local chat-related localStorage items
+        localStorage.removeItem("aria_chats")
+        localStorage.removeItem("aria_anonymous_messages")
+
+        // Clear any other chat-related localStorage items
+        const keysToRemove = []
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (key && (key.startsWith('aria_chat_') || key.startsWith('aria_font_'))) {
+            keysToRemove.push(key)
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key))
+
+        // Clear server-side chats (only attempt if we think user might be authenticated)
+        console.log('Attempting to clear server-side chat history...')
+        try {
+          const response = await fetch('/api/chat/clear', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+
+          const responseData = await response.json()
+          console.log('Clear API response:', response.status, responseData)
+
+          if (!response.ok) {
+            if (response.status === 401) {
+              console.log('User not authenticated, skipping server-side clearing')
+            } else {
+              console.warn('Server-side clearing failed:', responseData.error)
+            }
+          } else {
+            console.log('Server-side chats cleared successfully')
+          }
+        } catch (apiError) {
+          console.warn('Server-side clearing failed with exception:', apiError)
+        }
+
+        alert("Chat history cleared successfully!")
+
+        // Force a hard refresh to clear all client-side state
+        window.location.href = window.location.href
+
+      } catch (error) {
+        console.error('Error clearing chat history:', error)
+        alert("An error occurred while clearing chat history. Some data may remain.")
+      }
     }
   }
 
@@ -397,47 +315,30 @@ export default function SettingsPage() {
                 <div className="space-y-6">
                   <div>
                     <h2 className="text-2xl font-bold mb-2">Appearance Settings</h2>
-                    <p className="text-muted-foreground">Customize themes, fonts, and visual elements</p>
+                    <p className="text-muted-foreground">Customize fonts and visual elements. Theme automatically follows your system preference.</p>
                   </div>
 
-                  {/* Theme Selection */}
+                  {/* Theme Info */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Palette className="w-5 h-5" />
-                        Theme Selection
+                        Theme Settings
                       </CardTitle>
                       <CardDescription>
-                        Choose from popular color combinations. Font and color customizations below apply only to the selected theme.
+                        The app automatically follows your system theme preference (light/dark mode). Font and color customizations below apply to both themes.
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {themes.map((theme) => (
-                          <div
-                            key={theme.id}
-                            onClick={() => handleThemeChange(theme.id)}
-                            className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                              selectedTheme === theme.id
-                                ? 'border-primary bg-primary/5 shadow-md'
-                                : 'border-border hover:border-primary/50'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between mb-3">
-                              <h3 className="font-semibold">{theme.name}</h3>
-                              {selectedTheme === theme.id && (
-                                <div className="w-4 h-4 rounded-full bg-primary animate-pulse" />
-                              )}
-                            </div>
-                            <div
-                              className="h-12 rounded-md mb-2 flex items-center justify-center text-white text-sm font-medium"
-                              style={{ background: `linear-gradient(to right, ${theme.colors.accent}, ${theme.colors.userMessage})` }}
-                            >
-                              Preview
-                            </div>
-                            <p className="text-xs text-muted-foreground">{theme.description}</p>
+                    <CardContent>
+                      <div className="flex items-center justify-center p-6">
+                        <div className="text-center">
+                          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-3 shadow-lg">
+                            <Monitor className="w-8 h-8 text-white" />
                           </div>
-                        ))}
+                          <p className="text-sm text-muted-foreground">
+                            System theme: <span className="font-medium capitalize">{systemTheme || 'light'}</span>
+                          </p>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -504,10 +405,11 @@ export default function SettingsPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="p-3 bg-muted/50 rounded-md">
-                          <p className="text-sm" style={{ fontFamily: menuFontFamily, fontSize: `${menuFontSize}px`, color: menuFontColor }}>
+                        <div className="p-4 bg-muted/30 rounded-md border border-border">
+                          <p className="text-sm font-medium mb-1" style={{ fontFamily: menuFontFamily, fontSize: `${menuFontSize}px`, color: menuFontColor }}>
                             Preview: Settings • History • Modes
                           </p>
+                          <p className="text-xs opacity-60">Menu font preview</p>
                         </div>
                       </div>
 
@@ -561,10 +463,11 @@ export default function SettingsPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="p-3 bg-muted/50 rounded-md">
-                          <p className="text-sm" style={{ fontFamily: chatFontFamily, fontSize: `${chatFontSize}px`, color: chatFontColor }}>
+                        <div className="p-4 bg-muted/30 rounded-md border border-border">
+                          <p className="text-sm font-medium mb-1" style={{ fontFamily: chatFontFamily, fontSize: `${chatFontSize}px`, color: chatFontColor }}>
                             Preview: This is how your chat messages will look with the selected font settings.
                           </p>
+                          <p className="text-xs opacity-60">Chat message font preview</p>
                         </div>
                       </div>
 
@@ -618,10 +521,11 @@ export default function SettingsPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="p-3 bg-muted/50 rounded-md">
-                          <p className="text-sm" style={{ fontFamily: systemFontFamily, fontSize: `${systemFontSize}px`, color: systemFontColor }}>
+                        <div className="p-4 bg-muted/30 rounded-md border border-border">
+                          <p className="text-sm font-medium mb-1" style={{ fontFamily: systemFontFamily, fontSize: `${systemFontSize}px`, color: systemFontColor }}>
                             Preview: Buttons, labels, and other system text will use this styling.
                           </p>
+                          <p className="text-xs opacity-60">System font preview</p>
                         </div>
                       </div>
                     </CardContent>
