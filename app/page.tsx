@@ -32,7 +32,7 @@ export default function HomePage() {
 
   if (!showSplash) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#208299] to-[#1a6b7a] flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%)" }}>
         <div className="text-center max-w-2xl">
           <div className="w-24 h-24 bg-white/10 backdrop-blur-xl rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl border border-white/20">
             <Globe className="w-12 h-12 text-white" />
