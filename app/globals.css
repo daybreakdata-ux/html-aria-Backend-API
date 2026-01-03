@@ -214,6 +214,13 @@
     }
   }
 
+  /* ARIA wireframe title text */
+  .aria-wireframe-text {
+    color: transparent;
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: rgba(209, 250, 229, 0.95);
+  }
+
   .prose pre {
     @apply bg-transparent p-0 m-0;
   }

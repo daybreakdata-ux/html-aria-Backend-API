@@ -9,14 +9,17 @@ import { Sparkles, MessageSquare, Zap, Shield } from "lucide-react"
 function SpinningGlobe({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`relative inline-flex items-center justify-center overflow-hidden rounded-full bg-[conic-gradient(from_220deg_at_50%_50%,rgba(34,197,94,1),rgba(59,130,246,1),rgba(129,140,248,1),rgba(45,212,191,1),rgba(34,197,94,1))] aria-globe-spin shadow-lg shadow-emerald-500/30 ${className}`}
+      className={`relative inline-flex items-center justify-center overflow-hidden rounded-full bg-[conic-gradient(from_220deg_at_50%_50%,rgba(34,197,94,1),rgba(59,130,246,1),rgba(129,140,248,1),rgba(45,212,191,1),rgba(34,197,94,1))] aria-globe-spin shadow-lg shadow-emerald-500/40 ${className}`}
     >
-      <div className="absolute inset-[18%] rounded-full border border-emerald-200/40" />
-      <div className="absolute inset-[32%] rounded-full border border-emerald-200/25" />
-      <div className="absolute inset-[46%] rounded-full border border-emerald-200/15" />
-      <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-emerald-100/30" />
-      <div className="absolute left-1/4 top-0 h-full w-px bg-emerald-100/20" />
-      <div className="absolute left-3/4 top-0 h-full w-px bg-emerald-100/20" />
+      <div className="absolute inset-[18%] rounded-full border border-emerald-100/70" />
+      <div className="absolute inset-[32%] rounded-full border border-emerald-100/55" />
+      <div className="absolute inset-[46%] rounded-full border border-emerald-100/40" />
+      <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-emerald-100/70" />
+      <div className="absolute left-1/4 top-0 h-full w-px bg-emerald-100/45" />
+      <div className="absolute left-3/4 top-0 h-full w-px bg-emerald-100/45" />
+      <div className="absolute inset-x-[18%] top-1/4 h-px bg-emerald-100/45" />
+      <div className="absolute inset-x-[22%] top-1/2 h-px bg-emerald-100/40" />
+      <div className="absolute inset-x-[26%] top-3/4 h-px bg-emerald-100/30" />
       <div className="absolute bottom-1 right-2 h-3 w-3 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.9)]" />
       <div className="absolute inset-[8%] rounded-full bg-[radial-gradient(circle_at_20%_0%,rgba(255,255,255,0.6),transparent_55%)]" />
     </div>
@@ -42,22 +45,22 @@ export default function HomePage() {
   }, [status, router])
 
   const handleGetStarted = () => {
-    router.push("/chat")
+    router.push("/auth/signin")
   }
 
   if (showSplash) {
     return (
-      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.15),transparent_50%)]" />
         
         <div className="relative z-10 flex flex-col items-center justify-center space-y-8 px-6 text-center">
           <div className="relative">
             <div className="absolute -inset-4 animate-pulse rounded-full bg-gradient-to-r from-emerald-500/20 via-sky-500/20 to-violet-500/20 blur-2xl" />
-            <SpinningGlobe className="h-24 w-24 shadow-2xl shadow-sky-500/50" />
+            <SpinningGlobe className="h-32 w-32 shadow-2xl shadow-sky-500/50" />
           </div>
           
           <div className="space-y-3">
-            <h1 className="bg-gradient-to-r from-emerald-400 via-sky-400 to-violet-400 bg-clip-text text-6xl font-bold tracking-tight text-transparent">
+            <h1 className="aria-wireframe-text bg-gradient-to-r from-emerald-400 via-sky-400 to-violet-400 bg-clip-text text-7xl font-bold tracking-tight text-transparent sm:text-8xl">
               ARIA
             </h1>
             <div className="flex items-center justify-center gap-2">
@@ -72,7 +75,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.1),transparent_50%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(139,92,246,0.1),transparent_50%)]" />
       
@@ -117,7 +120,7 @@ export default function HomePage() {
                 className="h-14 rounded-full bg-gradient-to-r from-emerald-500 via-sky-500 to-violet-500 px-8 text-base font-semibold text-white shadow-2xl shadow-sky-500/50 transition-all hover:scale-105 hover:shadow-sky-500/70"
               >
                 <MessageSquare className="mr-2 h-5 w-5" />
-                Start Chatting
+                Sign In
               </Button>
               <Button
                 variant="outline"
