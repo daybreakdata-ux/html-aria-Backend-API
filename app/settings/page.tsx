@@ -96,7 +96,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="h-[100dvh] bg-background dark:bg-gradient-to-br dark:from-zinc-700 dark:to-indigo-600 flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-background dark:bg-gradient-to-r dark:from-slate-500 dark:to-slate-800 flex flex-col overflow-hidden">
       <header className="flex-shrink-0 border-b border-border bg-card">
         <div className="max-w-4xl mx-auto p-3 sm:p-3 sm:p-4 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">

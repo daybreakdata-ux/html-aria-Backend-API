@@ -763,7 +763,7 @@ export default function ChatPage() {
   // Show loading while checking authentication
   if (status === 'loading') {
     return (
-      <div className="h-[100dvh] flex items-center justify-center bg-background dark:bg-gradient-to-br dark:from-zinc-700 dark:to-indigo-600">
+      <div className="h-[100dvh] flex items-center justify-center bg-background dark:bg-gradient-to-r dark:from-slate-500 dark:to-slate-800">
         <div className="text-center">
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl" style={{ background: `linear-gradient(135deg, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
             <Globe className="w-8 h-8 text-white animate-pulse" />
@@ -775,7 +775,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-[100dvh] flex bg-background dark:bg-gradient-to-br dark:from-zinc-700 dark:to-indigo-600 overflow-hidden">
+    <div className="h-[100dvh] flex bg-background dark:bg-gradient-to-r dark:from-slate-500 dark:to-slate-800 overflow-hidden">
       <PermissionsManager onPermissionsUpdate={(perms) => {
         if (perms.location) {
           updateUserLocation()
