@@ -176,8 +176,8 @@ export function PermissionsManager({ onPermissionsUpdate }: PermissionsManagerPr
   const anyDenied = permissions.some((p) => p.status === "denied")
 
   return (
-    <div className="fixed top-4 right-4 z-50 max-w-md w-full mx-4 sm:mx-0">
-      <div className="bg-card border border-border rounded-xl shadow-2xl p-4 animate-in slide-in-from-top-4">
+    <div className="fixed top-4 right-4 z-50 max-w-[calc(100vw-2rem)] sm:max-w-sm md:max-w-md w-full mx-4">
+      <div className="bg-card border border-border rounded-xl shadow-2xl p-3 sm:p-4 animate-in slide-in-from-top-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-[#208299] to-[#1a6b7a] rounded-lg flex items-center justify-center">
@@ -228,7 +228,7 @@ export function PermissionsManager({ onPermissionsUpdate }: PermissionsManagerPr
           ))}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           {!allGranted && (
             <Button
               size="sm"
