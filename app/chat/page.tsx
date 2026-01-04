@@ -993,24 +993,24 @@ export default function ChatPage() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="flex-shrink-0 h-14 bg-gray-100 border-b border-gray-200 flex items-center justify-between px-4">
+        <header className="flex-shrink-0 h-14 border-b border-border/60 flex items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <Button
               size="sm"
               variant="ghost"
               onClick={() => setSidebarOpen(true)}
-              className="h-9 w-9 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-200"
+              className="h-9 w-9 p-0 dark:text-white dark:hover:text-gray-200 dark:hover:bg-white/10 text-black hover:text-gray-700 hover:bg-black/5"
               title="Menu"
             >
               <Menu className="w-5 h-5" />
             </Button>
-            <h1 className="text-lg font-semibold text-gray-900">ARIA</h1>
+            <h1 className="text-lg font-semibold dark:text-white text-black">ARIA</h1>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => document.getElementById('file-upload')?.click()}
-              className="h-9 w-9 rounded-lg border-2 border-dashed dark:border-white dark:text-white border-black text-black bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center justify-center"
+              className="h-9 w-9 rounded-lg border-2 border-dashed dark:border-white dark:text-white dark:hover:bg-white/5 border-black text-black bg-transparent hover:bg-black/5 transition-colors flex items-center justify-center"
               title="Attach file"
             >
               <Paperclip className="w-4 h-4" />
@@ -1020,7 +1020,7 @@ export default function ChatPage() {
               size="sm"
               variant="ghost"
               onClick={createNewChat}
-              className="h-9 w-9 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-200"
+              className="h-9 w-9 p-0 dark:text-white dark:hover:text-gray-200 dark:hover:bg-white/10 text-black hover:text-gray-700 hover:bg-black/5"
               title="New Chat"
             >
               <Plus className="w-5 h-5" />
