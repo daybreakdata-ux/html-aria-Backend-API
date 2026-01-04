@@ -13,7 +13,6 @@ import { Menu, Send, Settings, Plus, X, Copy, RotateCw, Globe, Sparkles, Downloa
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { PermissionsManager } from "@/components/permissions-manager"
-import { FileUploadButton } from "@/components/file-upload-button"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { performWebSearch } from "@/app/actions/web-search"
@@ -1240,8 +1239,8 @@ export default function ChatPage() {
         )}
 
         {/* Input Area */}
-        <div className="flex-shrink-0 px-4 py-4 border-t border-gray-200 bg-gray-100 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:pb-[env(safe-area-inset-bottom)] shadow-lg">
-          <div className="mx-auto" style={{ maxWidth: 'var(--chat-width, 800px)' }}>
+        <div className="flex-shrink-0 px-4 py-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:pb-[env(safe-area-inset-bottom)]">
+          <div className="mx-auto relative" style={{ maxWidth: 'var(--chat-width, 800px)' }}>
           {uploadedFile && (
             <div className="mb-3 p-3 bg-accent/10 border border-accent/20 rounded-xl flex items-center justify-between text-sm shadow-sm backdrop-blur-sm">
               <span className="flex items-center gap-2 text-accent-foreground">
@@ -1336,60 +1335,82 @@ export default function ChatPage() {
             </div>
           ) : (
             /* Text Chat Mode */
-            <div className="flex gap-2 items-end">
-              <FileUploadButton
-                onFileSelect={handleFileUpload}
-                disabled={isLoading || (status === 'unauthenticated' && anonymousMessageCount >= 4)}
-              />
-              <Textarea
-                ref={textareaRef}
-                value={message}
-                onChange={handleTextareaChange}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault()
-                    sendMessage()
+            <div className="relative">
+              {/* Floating Wireframe Buttons */}
+              <div className="absolute -top-16 left-0 flex gap-3">
+                <button
+                  onClick={() => document.getElementById('file-upload')?.click()}
+                  disabled={isLoading || (status === 'unauthenticated' && anonymousMessageCount >= 4)}
+                  className="w-12 h-12 rounded-full border-2 border-dashed dark:border-white dark:text-white border-black text-black bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center justify-center disabled:opacity-50"
+                  title="Attach file"
+                >
+                  <Paperclip className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                  disabled={isLoading || (status === 'unauthenticated' && anonymousMessageCount >= 4)}
+                  className={cn(
+                    "w-12 h-12 rounded-full border-2 border-dashed flex items-center justify-center transition-colors disabled:opacity-50",
+                    isRecording
+                      ? "border-red-500 text-red-500 bg-red-50 dark:bg-red-950/20 animate-pulse"
+                      : "dark:border-white dark:text-white dark:hover:bg-white/5 border-black text-black hover:bg-black/5"
+                  )}
+                  title={isRecording ? "Stop recording" : "Voice input"}
+                >
+                  <Mic className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Floating Input Container */}
+              <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl shadow-2xl p-1">
+                <div className="flex items-end gap-3 p-2">
+                  <Textarea
+                    ref={textareaRef}
+                    value={message}
+                    onChange={handleTextareaChange}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault()
+                        sendMessage()
+                      }
+                    }}
+                    placeholder={
+                      status === 'unauthenticated' && anonymousMessageCount >= 4
+                        ? "Join ARIA to continue chatting..."
+                        : "Ask me anything..."
+                    }
+                    className="flex-1 resize-none min-h-[44px] max-h-[120px] sm:max-h-[200px] rounded-2xl text-sm sm:text-base touch-manipulation bg-transparent border-0 focus:ring-0 focus:outline-none placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                    rows={1}
+                    disabled={isLoading || (status === 'unauthenticated' && anonymousMessageCount >= 4)}
+                  />
+                  <Button
+                    size="sm"
+                    onClick={() => sendMessage()}
+                    disabled={
+                      isLoading ||
+                      !message.trim() ||
+                      (status === 'unauthenticated' && anonymousMessageCount >= 4)
+                    }
+                    className="h-10 w-10 rounded-2xl p-0 flex-shrink-0 bg-accent hover:bg-accent/90 text-white shadow-lg"
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Hidden file input */}
+              <input
+                id="file-upload"
+                type="file"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    handleFileUpload(file)
                   }
                 }}
-                placeholder={
-                  status === 'unauthenticated' && anonymousMessageCount >= 4
-                    ? "Join ARIA to continue chatting..."
-                    : "Ask me anything..."
-                }
-                className="resize-none min-h-[44px] max-h-[120px] sm:max-h-[200px] rounded-xl sm:rounded-2xl text-sm sm:text-base touch-manipulation"
-                rows={1}
-                disabled={isLoading || (status === 'unauthenticated' && anonymousMessageCount >= 4)}
+                className="hidden"
+                accept="image/*,.pdf,.doc,.docx,.txt"
               />
-              <Button
-                size="sm"
-                onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                disabled={isLoading || (status === 'unauthenticated' && anonymousMessageCount >= 4)}
-                className={cn(
-                  "h-11 w-11 sm:h-12 sm:w-12 p-0 flex-shrink-0 rounded-xl touch-manipulation",
-                  isRecording
-                    ? "bg-accent hover:bg-accent/90 animate-pulse text-white"
-                    : ""
-                )}
-                title={isRecording ? "Stop recording" : "Voice input"}
-              >
-                <Mic className={cn(
-                  "w-4 h-4 sm:w-5 sm:h-5",
-                  isRecording ? "text-white" : ""
-                )} />
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => sendMessage()}
-                disabled={
-                  isLoading ||
-                  !message.trim() ||
-                  (status === 'unauthenticated' && anonymousMessageCount >= 4)
-                }
-                className="h-11 w-11 sm:h-12 sm:w-12 p-0 flex-shrink-0 rounded-xl touch-manipulation [&:not(:disabled):hover]:opacity-80"
-                style={{ backgroundColor: 'var(--accent-color)' }}
-              >
-                <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-              </Button>
             </div>
           )}
           <p className="text-[10px] sm:text-xs text-muted-foreground text-center mt-2 hidden sm:block">
