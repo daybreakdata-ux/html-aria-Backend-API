@@ -1,743 +1,320 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { useTheme } from "next-themes"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { ArrowLeft, Save, Settings, Shield, Bell, Eye, Download, Upload, RotateCcw, Globe, Palette, Zap, Volume2, MessageSquare } from "lucide-react"
+import { Slider } from "@/components/ui/slider"
+import { ArrowLeft, Save, Globe } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-  const [activeCategory, setActiveCategory] = useState("general")
-
-  // General Settings
-  const [language, setLanguage] = useState("en")
-  const [autoSave, setAutoSave] = useState(true)
-  const [compactMode, setCompactMode] = useState(false)
-
-  // Privacy & Data
-  const [analyticsEnabled, setAnalyticsEnabled] = useState(false)
-  const [dataRetention, setDataRetention] = useState("30")
-  const [shareUsageData, setShareUsageData] = useState(false)
-
-  // Accessibility
-  const [highContrast, setHighContrast] = useState(false)
-  const [reducedMotion, setReducedMotion] = useState(false)
-  const [fontSize, setFontSize] = useState("medium")
-  const [dyslexicFont, setDyslexicFont] = useState(false)
-
-  // Notifications
-  const [messageNotifications, setMessageNotifications] = useState(true)
-  const [soundEnabled, setSoundEnabled] = useState(true)
-  const [desktopNotifications, setDesktopNotifications] = useState(false)
-
-  // Advanced
-  const [developerMode, setDeveloperMode] = useState(false)
+  const [chatBoxWidth, setChatBoxWidth] = useState(768)
+  const [lightModeBrightness, setLightModeBrightness] = useState(100)
+  const [darkModeBrightness, setDarkModeBrightness] = useState(100)
+  const [fontSize, setFontSize] = useState(16)
+  const [accentColor, setAccentColor] = useState("#208299")
+  const [userMessageColor, setUserMessageColor] = useState("#208299")
+  const [manualLocation, setManualLocation] = useState("")
+  const [holdProgress, setHoldProgress] = useState(0)
+  const logoTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const logoIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    setMounted(true)
+    // Load UI settings from localStorage
+    setChatBoxWidth(Number(localStorage.getItem("aria_chat_width")) || 768)
+    setLightModeBrightness(Number(localStorage.getItem("aria_light_brightness")) || 100)
+    setDarkModeBrightness(Number(localStorage.getItem("aria_dark_brightness")) || 100)
+    setFontSize(Number(localStorage.getItem("aria_font_size")) || 16)
+    setAccentColor(localStorage.getItem("aria_accent_color") || "#208299")
+    setUserMessageColor(localStorage.getItem("aria_user_message_color") || "#208299")
+    setManualLocation(localStorage.getItem("aria_manual_location") || "")
   }, [])
 
+  // Apply CSS variables in real-time
   useEffect(() => {
-    if (!mounted) return
+    applyCSSVariables()
+  }, [chatBoxWidth, lightModeBrightness, darkModeBrightness, fontSize, accentColor, userMessageColor])
 
-    // Load settings from localStorage
-    setLanguage(localStorage.getItem("aria_language") || "en")
-    setAutoSave(localStorage.getItem("aria_auto_save") !== "false")
-    setCompactMode(localStorage.getItem("aria_compact_mode") === "true")
-
-    setAnalyticsEnabled(localStorage.getItem("aria_analytics") === "true")
-    setDataRetention(localStorage.getItem("aria_data_retention") || "30")
-    setShareUsageData(localStorage.getItem("aria_share_usage") === "true")
-
-    setHighContrast(localStorage.getItem("aria_high_contrast") === "true")
-    setReducedMotion(localStorage.getItem("aria_reduced_motion") === "true")
-    setFontSize(localStorage.getItem("aria_font_size") || "medium")
-    setDyslexicFont(localStorage.getItem("aria_dyslexic_font") === "true")
-
-    setMessageNotifications(localStorage.getItem("aria_msg_notifications") !== "false")
-    setSoundEnabled(localStorage.getItem("aria_sound_enabled") !== "false")
-    setDesktopNotifications(localStorage.getItem("aria_desktop_notifications") === "true")
-
-    setDeveloperMode(localStorage.getItem("aria_developer_mode") === "true")
-  }, [mounted])
+  const applyCSSVariables = () => {
+    const root = document.documentElement
+    root.style.setProperty("--chat-width", `${chatBoxWidth}px`)
+    root.style.setProperty("--light-brightness", `${lightModeBrightness}%`)
+    root.style.setProperty("--dark-brightness", `${darkModeBrightness}%`)
+    root.style.setProperty("--base-font-size", `${fontSize}px`)
+    root.style.setProperty("--accent-color", accentColor)
+    root.style.setProperty("--user-message-color", userMessageColor)
+  }
 
   const handleSave = () => {
-    // Save all settings to localStorage
-    localStorage.setItem("aria_language", language)
-    localStorage.setItem("aria_auto_save", autoSave.toString())
-    localStorage.setItem("aria_compact_mode", compactMode.toString())
+    localStorage.setItem("aria_chat_width", chatBoxWidth.toString())
+    localStorage.setItem("aria_light_brightness", lightModeBrightness.toString())
+    localStorage.setItem("aria_dark_brightness", darkModeBrightness.toString())
+    localStorage.setItem("aria_font_size", fontSize.toString())
+    localStorage.setItem("aria_accent_color", accentColor)
+    localStorage.setItem("aria_user_message_color", userMessageColor)
+    localStorage.setItem("aria_manual_location", manualLocation)
 
-    localStorage.setItem("aria_analytics", analyticsEnabled.toString())
-    localStorage.setItem("aria_data_retention", dataRetention)
-    localStorage.setItem("aria_share_usage", shareUsageData.toString())
-
-    localStorage.setItem("aria_high_contrast", highContrast.toString())
-    localStorage.setItem("aria_reduced_motion", reducedMotion.toString())
-    localStorage.setItem("aria_font_size", fontSize)
-    localStorage.setItem("aria_dyslexic_font", dyslexicFont.toString())
-
-    localStorage.setItem("aria_msg_notifications", messageNotifications.toString())
-    localStorage.setItem("aria_sound_enabled", soundEnabled.toString())
-    localStorage.setItem("aria_desktop_notifications", desktopNotifications.toString())
-
-    localStorage.setItem("aria_developer_mode", developerMode.toString())
-
-    // Apply theme changes immediately
-    if (theme) {
-      setTheme(theme)
-    }
-
+    applyCSSVariables()
     router.push("/chat")
   }
 
-  const handleExportSettings = () => {
-    const settings = {
-      language,
-      autoSave,
-      compactMode,
-      analyticsEnabled,
-      dataRetention,
-      shareUsageData,
-      highContrast,
-      reducedMotion,
-      fontSize,
-      dyslexicFont,
-      messageNotifications,
-      soundEnabled,
-      desktopNotifications,
-      developerMode,
-      theme
-    }
+  const handleLogoPress = () => {
+    // Start progress bar animation
+    let progress = 0
+    logoIntervalRef.current = setInterval(() => {
+      progress += 1
+      setHoldProgress(progress)
+    }, 100)
 
-    const dataStr = JSON.stringify(settings, null, 2)
-    const dataBlob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(dataBlob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'aria-settings.json'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+    // Set timeout for 10 seconds
+    logoTimeoutRef.current = setTimeout(() => {
+      // Grant access to admin page
+      sessionStorage.setItem("aria_admin_token", "daybreak_admin_access")
+      router.push("/settings/admin")
+
+      // Clean up
+      if (logoIntervalRef.current) clearInterval(logoIntervalRef.current)
+      setHoldProgress(0)
+    }, 10000)
   }
 
-  const handleImportSettings = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        try {
-          const settings = JSON.parse(e.target?.result as string)
-
-          // Apply imported settings
-          if (settings.language) setLanguage(settings.language)
-          if (typeof settings.autoSave === 'boolean') setAutoSave(settings.autoSave)
-          if (typeof settings.compactMode === 'boolean') setCompactMode(settings.compactMode)
-          if (typeof settings.analyticsEnabled === 'boolean') setAnalyticsEnabled(settings.analyticsEnabled)
-          if (settings.dataRetention) setDataRetention(settings.dataRetention)
-          if (typeof settings.shareUsageData === 'boolean') setShareUsageData(settings.shareUsageData)
-          if (typeof settings.highContrast === 'boolean') setHighContrast(settings.highContrast)
-          if (typeof settings.reducedMotion === 'boolean') setReducedMotion(settings.reducedMotion)
-          if (settings.fontSize) setFontSize(settings.fontSize)
-          if (typeof settings.dyslexicFont === 'boolean') setDyslexicFont(settings.dyslexicFont)
-          if (typeof settings.messageNotifications === 'boolean') setMessageNotifications(settings.messageNotifications)
-          if (typeof settings.soundEnabled === 'boolean') setSoundEnabled(settings.soundEnabled)
-          if (typeof settings.desktopNotifications === 'boolean') setDesktopNotifications(settings.desktopNotifications)
-          if (typeof settings.developerMode === 'boolean') setDeveloperMode(settings.developerMode)
-
-          alert("Settings imported successfully!")
-        } catch (error) {
-          alert("Error importing settings. Please check the file format.")
-        }
-      }
-      reader.readAsText(file)
-    }
+  const handleLogoRelease = () => {
+    // Cancel the timeout and reset progress
+    if (logoTimeoutRef.current) clearTimeout(logoTimeoutRef.current)
+    if (logoIntervalRef.current) clearInterval(logoIntervalRef.current)
+    setHoldProgress(0)
   }
 
-  const handleResetSettings = () => {
-    // Reset to defaults
-    setLanguage("en")
-    setAutoSave(true)
-    setCompactMode(false)
-    setAnalyticsEnabled(false)
-    setDataRetention("30")
-    setShareUsageData(false)
-    setHighContrast(false)
-    setReducedMotion(false)
-    setFontSize("medium")
-    setDyslexicFont(false)
-    setMessageNotifications(true)
-    setSoundEnabled(true)
-    setDesktopNotifications(false)
-    setDeveloperMode(false)
-
-    alert("Settings reset to defaults!")
-  }
-
-  const handleClearData = async () => {
-    try {
-      // Clear local chat-related localStorage items
+  const handleClearHistory = () => {
+    if (confirm("Are you sure you want to clear all chat history? This cannot be undone.")) {
       localStorage.removeItem("aria_chats")
-      localStorage.removeItem("aria_anonymous_messages")
-
-      // Clear any other app-related localStorage items
-      const keysToRemove = []
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i)
-        if (key && key.startsWith('aria_')) {
-          keysToRemove.push(key)
-        }
-      }
-      keysToRemove.forEach(key => localStorage.removeItem(key))
-
-      // Clear server-side chats (only attempt if we think user might be authenticated)
-      console.log('Attempting to clear server-side chat history...')
-      try {
-        const response = await fetch('/api/chat/clear', {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-
-        const responseData = await response.json()
-        console.log('Clear API response:', response.status, responseData)
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            console.log('User not authenticated, skipping server-side clearing')
-          } else {
-            console.warn('Server-side clearing failed:', responseData.error)
-          }
-        } else {
-          console.log('Server-side chats cleared successfully')
-        }
-      } catch (apiError) {
-        console.warn('Server-side clearing failed with exception:', apiError)
-      }
-
-      alert("All data cleared successfully!")
-
-      // Force a hard refresh to clear all client-side state
-      window.location.href = window.location.href
-
-    } catch (error) {
-      console.error('Error clearing data:', error)
-      alert("An error occurred while clearing data. Some data may remain.")
+      alert("Chat history cleared successfully!")
     }
   }
-
-  const categories = [
-    { id: "general", label: "General", icon: Settings, description: "App preferences and behavior" },
-    { id: "privacy", label: "Privacy & Data", icon: Shield, description: "Data management and privacy settings" },
-    { id: "accessibility", label: "Accessibility", icon: Eye, description: "Accessibility and display options" },
-    { id: "notifications", label: "Notifications", icon: Bell, description: "Notification preferences" },
-    { id: "advanced", label: "Advanced", icon: Zap, description: "Developer options and tools" }
-  ]
 
   return (
-    <div className="h-[100dvh] bg-background flex overflow-hidden">
-      {/* Floating Buttons */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => router.push("/chat")}
-        className="floating-button top-left h-10 w-10 sm:h-11 sm:w-11 p-0 shadow-lg"
-        title="Back to Chat"
-      >
-        <ArrowLeft className="w-5 h-5" />
-      </Button>
-
-      <Button
-        onClick={handleSave}
-        className="floating-button top-right-2 px-4 h-10 sm:h-11 text-sm shadow-lg [&:not(:disabled):hover]:opacity-80"
-        style={{ backgroundColor: 'var(--accent-color)' }}
-        title="Save Changes"
-      >
-        <Save className="w-4 h-4 sm:mr-2" />
-        <span className="hidden sm:inline">Save</span>
-      </Button>
-
-      <div className="floating-button top-right">
-        <ThemeToggle />
-      </div>
-
-      <Tabs value={activeCategory} onValueChange={setActiveCategory} className="h-full flex flex-col w-full">
-        {/* Horizontal Tabs at Top */}
-        <div className="border-b border-border bg-muted/30">
-          <div className="max-w-6xl mx-auto">
-            <TabsList className="grid w-full grid-cols-5 p-1">
-              {categories.map((category) => {
-                const Icon = category.icon
-                return (
-                  <TabsTrigger
-                    key={category.id}
-                    value={category.id}
-                    className="flex flex-col items-center gap-1 py-3 px-2 text-xs data-[state=active]:bg-background"
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="font-medium">{category.label}</span>
-                  </TabsTrigger>
-                )
-              })}
-            </TabsList>
-          </div>
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-hidden min-h-0">
-          <div className="h-full overflow-y-auto">
-            <div className="max-w-4xl mx-auto p-4 md:p-6 pb-[env(safe-area-inset-bottom)]">
-
-              {/* General Tab */}
-              <TabsContent value="general" className="space-y-8 mt-0">
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-2xl font-bold mb-2">General Settings</h2>
-                    <p className="text-muted-foreground">Configure basic app preferences and behavior</p>
-                  </div>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Settings className="w-5 h-5" />
-                        App Preferences
-                      </CardTitle>
-                      <CardDescription>
-                        General application settings and preferences
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label>Language</Label>
-                          <p className="text-sm text-muted-foreground">Select your preferred language</p>
-                        </div>
-                        <Select value={language} onValueChange={setLanguage}>
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="en">English</SelectItem>
-                            <SelectItem value="es">Español</SelectItem>
-                            <SelectItem value="fr">Français</SelectItem>
-                            <SelectItem value="de">Deutsch</SelectItem>
-                            <SelectItem value="it">Italiano</SelectItem>
-                            <SelectItem value="pt">Português</SelectItem>
-                            <SelectItem value="ru">Русский</SelectItem>
-                            <SelectItem value="ja">日本語</SelectItem>
-                            <SelectItem value="ko">한국어</SelectItem>
-                            <SelectItem value="zh">中文</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label>Auto-save conversations</Label>
-                          <p className="text-sm text-muted-foreground">Automatically save your chat history</p>
-                        </div>
-                        <Switch checked={autoSave} onCheckedChange={setAutoSave} />
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label>Compact mode</Label>
-                          <p className="text-sm text-muted-foreground">Use a more compact interface</p>
-                        </div>
-                        <Switch checked={compactMode} onCheckedChange={setCompactMode} />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Palette className="w-5 h-5" />
-                        Appearance
-                      </CardTitle>
-                      <CardDescription>
-                        Customize the visual appearance of the application
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-center p-6">
-                        <div className="text-center">
-                          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-3 shadow-lg">
-                            <Palette className="w-8 h-8 text-white" />
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            Theme controls are available in the top-right corner
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              {/* Privacy & Data Tab */}
-              <TabsContent value="privacy" className="space-y-8 mt-0">
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-2xl font-bold mb-2">Privacy & Data</h2>
-                    <p className="text-muted-foreground">Manage your data and privacy preferences</p>
-                  </div>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Shield className="w-5 h-5" />
-                        Data Privacy
-                      </CardTitle>
-                      <CardDescription>
-                        Control how your data is handled and stored
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label>Analytics</Label>
-                          <p className="text-sm text-muted-foreground">Help improve the app with anonymous usage data</p>
-                        </div>
-                        <Switch checked={analyticsEnabled} onCheckedChange={setAnalyticsEnabled} />
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label>Share usage data</Label>
-                          <p className="text-sm text-muted-foreground">Share anonymized conversation patterns</p>
-                        </div>
-                        <Switch checked={shareUsageData} onCheckedChange={setShareUsageData} />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Data retention period</Label>
-                        <Select value={dataRetention} onValueChange={setDataRetention}>
-                          <SelectTrigger className="w-48">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="7">7 days</SelectItem>
-                            <SelectItem value="30">30 days</SelectItem>
-                            <SelectItem value="90">90 days</SelectItem>
-                            <SelectItem value="365">1 year</SelectItem>
-                            <SelectItem value="never">Never delete</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-muted-foreground">
-                          How long to keep your chat history
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <MessageSquare className="w-5 h-5" />
-                        Data Management
-                      </CardTitle>
-                      <CardDescription>
-                        Export, import, or clear your data
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex flex-wrap gap-3">
-                        <Button variant="outline" onClick={handleExportSettings}>
-                          <Download className="w-4 h-4 mr-2" />
-                          Export Settings
-                        </Button>
-                        <Button variant="outline" onClick={() => document.getElementById('import-settings')?.click()}>
-                          <Upload className="w-4 h-4 mr-2" />
-                          Import Settings
-                        </Button>
-                        <input
-                          id="import-settings"
-                          type="file"
-                          accept=".json"
-                          onChange={handleImportSettings}
-                          className="hidden"
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Export your settings as a JSON file or import settings from a previously exported file.
-                      </p>
-
-                      <div className="pt-4 border-t">
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="w-full sm:w-auto">
-                              Clear All Data
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Clear All Data</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This will permanently delete all your chat history, settings, and preferences.
-                                This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={handleClearData} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                Clear All Data
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Permanently delete all your data from this device.
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              {/* Accessibility Tab */}
-              <TabsContent value="accessibility" className="space-y-8 mt-0">
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-2xl font-bold mb-2">Accessibility</h2>
-                    <p className="text-muted-foreground">Make the app more accessible and easier to use</p>
-                  </div>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Eye className="w-5 h-5" />
-                        Visual Settings
-                      </CardTitle>
-                      <CardDescription>
-                        Adjust visual elements for better accessibility
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label>High contrast mode</Label>
-                          <p className="text-sm text-muted-foreground">Increase contrast for better visibility</p>
-                        </div>
-                        <Switch checked={highContrast} onCheckedChange={setHighContrast} />
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label>Reduced motion</Label>
-                          <p className="text-sm text-muted-foreground">Minimize animations and transitions</p>
-                        </div>
-                        <Switch checked={reducedMotion} onCheckedChange={setReducedMotion} />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Font size</Label>
-                        <Select value={fontSize} onValueChange={setFontSize}>
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="small">Small</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="large">Large</SelectItem>
-                            <SelectItem value="extra-large">Extra Large</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-muted-foreground">
-                          Adjust the overall font size of the application
-                        </p>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label>Dyslexic-friendly font</Label>
-                          <p className="text-sm text-muted-foreground">Use fonts designed for dyslexia</p>
-                        </div>
-                        <Switch checked={dyslexicFont} onCheckedChange={setDyslexicFont} />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              {/* Notifications Tab */}
-              <TabsContent value="notifications" className="space-y-8 mt-0">
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-2xl font-bold mb-2">Notifications</h2>
-                    <p className="text-muted-foreground">Configure when and how you receive notifications</p>
-                  </div>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Bell className="w-5 h-5" />
-                        Notification Settings
-                      </CardTitle>
-                      <CardDescription>
-                        Control notification preferences
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label>Message notifications</Label>
-                          <p className="text-sm text-muted-foreground">Get notified when new messages arrive</p>
-                        </div>
-                        <Switch checked={messageNotifications} onCheckedChange={setMessageNotifications} />
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label>Sound effects</Label>
-                          <p className="text-sm text-muted-foreground">Play sounds for notifications and interactions</p>
-                        </div>
-                        <Switch checked={soundEnabled} onCheckedChange={setSoundEnabled} />
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label>Desktop notifications</Label>
-                          <p className="text-sm text-muted-foreground">Show system notifications</p>
-                        </div>
-                        <Switch checked={desktopNotifications} onCheckedChange={setDesktopNotifications} />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Volume2 className="w-5 h-5" />
-                        Audio Settings
-                      </CardTitle>
-                      <CardDescription>
-                        Configure audio preferences for voice interactions
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-center py-8">
-                        <Volume2 className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                        <p className="text-muted-foreground">
-                          Voice settings will be available when voice features are implemented
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              {/* Advanced Tab */}
-              <TabsContent value="advanced" className="space-y-8 mt-0">
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-2xl font-bold mb-2">Advanced Settings</h2>
-                    <p className="text-muted-foreground">Developer options and advanced configuration</p>
-                  </div>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Zap className="w-5 h-5" />
-                        Developer Options
-                      </CardTitle>
-                      <CardDescription>
-                        Advanced settings for developers and power users
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label>Developer mode</Label>
-                          <p className="text-sm text-muted-foreground">Enable advanced debugging features</p>
-                        </div>
-                        <Switch checked={developerMode} onCheckedChange={setDeveloperMode} />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <RotateCcw className="w-5 h-5" />
-                        Reset Options
-                      </CardTitle>
-                      <CardDescription>
-                        Reset settings to their default values
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="outline" className="w-full sm:w-auto">
-                            <RotateCcw className="w-4 h-4 mr-2" />
-                            Reset All Settings
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Reset All Settings</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will reset all your settings to their default values. Your chat history will not be affected.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleResetSettings}>
-                              Reset Settings
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-
-                      <p className="text-xs text-muted-foreground">
-                        This will reset all settings to their default values without affecting your chat history.
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>About ARIA</CardTitle>
-                      <CardDescription>
-                        Information about this application
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2 text-sm">
-                        <p>
-                          <strong className="text-foreground">Version:</strong> 2.0.0
-                        </p>
-                        <p>
-                          <strong className="text-foreground">Description:</strong> ARIA is a private AI assistant, powered by advanced language models and real time data. Created by
-                          Daybreak Data to provide accurate, contextual, and up-to-date information.
-                        </p>
-                        <p>
-                          <strong className="text-foreground">Privacy:</strong> All data is stored locally in your browser. No
-                          information is sent to external servers except your conversations to the AI model and web
-                          searches when real-time information is requested.
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+      <header className="flex-shrink-0 border-b border-border bg-card">
+        <div className="max-w-4xl mx-auto p-3 sm:p-3 sm:p-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button variant="ghost" size="sm" onClick={() => router.push("/chat")} className="px-2 sm:px-3">
+              <ArrowLeft className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Back</span>
+            </Button>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center" style={{ background: `linear-gradient(to bottom right, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
+                <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+              </div>
+              <h1 className="text-lg sm:text-xl font-bold">Settings</h1>
             </div>
           </div>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <ThemeToggle />
+            <Button onClick={handleSave} className="px-2 sm:px-3 text-xs sm:text-sm [&:not(:disabled):hover]:opacity-80" style={{ backgroundColor: 'var(--accent-color)' }}>
+              <Save className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Save</span>
+            </Button>
+          </div>
         </div>
-      </Tabs>
+      </header>
+
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8 pb-[env(safe-area-inset-bottom)]">
+          {/* UI Customization */}
+          <section className="space-y-4">
+            <h2 className="text-lg font-semibold">UI Customization</h2>
+
+            <div className="space-y-2">
+              <Label htmlFor="chat-width">Chat Box Max Width: {chatBoxWidth}px</Label>
+              <Slider
+                id="chat-width"
+                value={[chatBoxWidth]}
+                onValueChange={(value) => setChatBoxWidth(value[0])}
+                min={400}
+                max={1200}
+                step={50}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                Maximum width of the chat messages container
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="light-brightness">Light Mode Brightness: {lightModeBrightness}%</Label>
+              <Slider
+                id="light-brightness"
+                value={[lightModeBrightness]}
+                onValueChange={(value) => setLightModeBrightness(value[0])}
+                min={50}
+                max={150}
+                step={5}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                Adjust brightness for light mode (100% is default)
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dark-brightness">Dark Mode Brightness: {darkModeBrightness}%</Label>
+              <Slider
+                id="dark-brightness"
+                value={[darkModeBrightness]}
+                onValueChange={(value) => setDarkModeBrightness(value[0])}
+                min={50}
+                max={150}
+                step={5}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                Adjust brightness for dark mode (100% is default)
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="font-size">Base Font Size: {fontSize}px</Label>
+              <Slider
+                id="font-size"
+                value={[fontSize]}
+                onValueChange={(value) => setFontSize(value[0])}
+                min={12}
+                max={24}
+                step={1}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                Adjust the base font size for the entire app
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="accent-color">Accent Color</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  id="accent-color"
+                  type="color"
+                  value={accentColor}
+                  onChange={(e) => setAccentColor(e.target.value)}
+                  className="w-20 h-10 cursor-pointer"
+                />
+                <Input
+                  type="text"
+                  value={accentColor}
+                  onChange={(e) => setAccentColor(e.target.value)}
+                  placeholder="#208299"
+                  className="flex-1"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Primary accent color for buttons and highlights
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="user-message-color">User Message Color</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  id="user-message-color"
+                  type="color"
+                  value={userMessageColor}
+                  onChange={(e) => setUserMessageColor(e.target.value)}
+                  className="w-20 h-10 cursor-pointer"
+                />
+                <Input
+                  type="text"
+                  value={userMessageColor}
+                  onChange={(e) => setUserMessageColor(e.target.value)}
+                  placeholder="#208299"
+                  className="flex-1"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Color for user message indicators and avatar
+              </p>
+            </div>
+          </section>
+
+          {/* Location */}
+          <section className="space-y-4">
+            <h2 className="text-lg font-semibold">Location</h2>
+
+            <div className="space-y-2">
+              <Label htmlFor="manual-location">Manual Location Override</Label>
+              <Input
+                id="manual-location"
+                type="text"
+                value={manualLocation}
+                onChange={(e) => setManualLocation(e.target.value)}
+                placeholder="e.g., San Francisco, CA or leave empty for auto-detect"
+              />
+              <p className="text-xs text-muted-foreground">
+                Override automatic location detection with a custom location
+              </p>
+            </div>
+          </section>
+
+          {/* Data Management */}
+          <section className="space-y-4">
+            <h2 className="text-lg font-semibold">Data Management</h2>
+
+            <div className="flex flex-wrap gap-3">
+              <Button
+                variant="outline"
+                onClick={handleClearHistory}
+                className="border-destructive text-destructive hover:bg-destructive/10 bg-transparent"
+              >
+                Clear Chat History
+              </Button>
+            </div>
+          </section>
+
+          {/* About */}
+          <section className="space-y-4 border-t border-border pt-6">
+            <h2 className="text-lg font-semibold">About Daybreak Data</h2>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                <strong className="text-foreground">Version:</strong> 2.0.0
+              </p>
+              <p>
+                <strong className="text-foreground">Description:</strong> ARIA is a private AI assistant, powered by advanced language models and real time data. Created by
+                Daybreak Data to provide accurate, contextual, and up-to-date information.
+              </p>
+              <p>
+                <strong className="text-foreground">Privacy:</strong> All data is stored locally in your browser. No
+                information is sent to external servers except your conversations to the AI model and web
+                searches when real-time information is requested.
+              </p>
+            </div>
+
+            {/* Secret Admin Access Logo */}
+            <div className="flex justify-center pt-4">
+              <div
+                className="relative cursor-pointer select-none"
+                onMouseDown={handleLogoPress}
+                onMouseUp={handleLogoRelease}
+                onMouseLeave={handleLogoRelease}
+                onTouchStart={handleLogoPress}
+                onTouchEnd={handleLogoRelease}
+                onTouchCancel={handleLogoRelease}
+              >
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg relative overflow-hidden" style={{ background: `linear-gradient(to bottom right, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
+                  <Globe className="w-8 h-8 text-white" />
+                  {holdProgress > 0 && (
+                    <div
+                      className="absolute bottom-0 left-0 right-0 bg-white/30 transition-all"
+                      style={{ height: `${holdProgress}%` }}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
   )
 }
