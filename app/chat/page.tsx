@@ -55,7 +55,11 @@ interface Mode {
 
 export default function ChatPage() {
   const router = useRouter()
-  const { data: session, status } = useSession()
+  const { data: session, status: authStatus } = useSession()
+
+  // Bypass authentication for local development
+  const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true' || process.env.BYPASS_AUTH === 'true'
+  const status = bypassAuth ? 'authenticated' : authStatus
   const [chats, setChats] = useState<Chat[]>([])
   const [activeChat, setActiveChat] = useState<string | null>(null)
   const [message, setMessage] = useState("")
