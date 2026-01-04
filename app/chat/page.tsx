@@ -1033,20 +1033,12 @@ export default function ChatPage() {
             {currentChat?.messages.map((msg) => (
               <div
                 key={msg.id}
-                className={cn(
-                  "flex gap-3 sm:gap-4 animate-in slide-in-from-bottom-2 duration-300",
-                  msg.role === "user" ? "justify-end" : "justify-start",
-                )}
+                className="flex justify-start animate-in slide-in-from-bottom-2 duration-300"
               >
-                {msg.role === "assistant" && (
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 shadow-md" style={{ background: `linear-gradient(to bottom right, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
-                    <Globe className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white" />
-                  </div>
-                )}
                 <div
                   className={cn(
                     "max-w-[85%] rounded-xl sm:rounded-2xl group overflow-hidden shadow-sm",
-                    msg.role === "user" && "text-white p-3 sm:p-4 break-words",
+                    msg.role === "user" && "text-white p-3 sm:p-4 break-words ml-auto",
                     msg.role === "assistant" && "bg-card border border-border/50 p-3 sm:p-4",
                     msg.role === "error" && "bg-destructive/10 text-destructive p-3 sm:p-4 border border-destructive/20",
                   )}
@@ -1162,20 +1154,12 @@ export default function ChatPage() {
                     </div>
                   )}
                 </div>
-                {msg.role === "user" && (
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 shadow-md" style={{ backgroundColor: 'color-mix(in srgb, var(--user-message-color) 20%, transparent)', border: '1px solid color-mix(in srgb, var(--user-message-color) 30%, transparent)' }}>
-                    <span className="text-[10px] sm:text-xs font-semibold" style={{ color: 'var(--user-message-color)' }}>You</span>
-                  </div>
-                )}
               </div>
             ))}
 
             {isSearching && (
-              <div className="flex justify-start gap-4">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md" style={{ background: `linear-gradient(to bottom right, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
-                  <Globe className="w-4 h-4 text-white animate-pulse" />
-                </div>
-                <div className="bg-muted/50 p-4 rounded-2xl">
+              <div className="flex justify-start">
+                <div className="bg-muted/50 p-4 rounded-2xl max-w-[85%]">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <div className="flex gap-1">
                       <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--accent-color)' }} />
@@ -1189,11 +1173,8 @@ export default function ChatPage() {
             )}
 
             {isLoading && !isSearching && (
-              <div className="flex justify-start gap-4">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md" style={{ background: `linear-gradient(to bottom right, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, black))` }}>
-                  <Globe className="w-4 h-4 text-white animate-pulse" />
-                </div>
-                <div className="bg-muted/50 p-4 rounded-2xl">
+              <div className="flex justify-start">
+                <div className="bg-muted/50 p-4 rounded-2xl max-w-[85%]">
                   <div className="flex gap-1">
                     <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--accent-color)' }} />
                     <div className="w-2 h-2 rounded-full animate-bounce delay-100" style={{ backgroundColor: 'var(--accent-color)' }} />
