@@ -1395,7 +1395,6 @@ export default function ChatPage() {
               >
                 <Mic className="w-5 h-5" />
               </button>
-            </div>
 
               {/* Hidden file input */}
               <input
