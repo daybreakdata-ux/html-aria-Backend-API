@@ -1039,7 +1039,7 @@ export default function ChatPage() {
                   className={cn(
                     "max-w-[85%] rounded-2xl sm:rounded-3xl group overflow-hidden relative",
                     msg.role === "user" && "text-white p-4 sm:p-5 break-words ml-auto bg-gradient-to-br from-accent via-accent to-accent/90 shadow-lg shadow-accent/20 border border-accent/20",
-                    msg.role === "assistant" && "bg-card/80 backdrop-blur-sm border border-border/60 p-4 sm:p-5 shadow-lg shadow-black/5 dark:shadow-black/20",
+                    msg.role === "assistant" && "bg-gray-100 border border-gray-200 p-4 sm:p-5 shadow-lg",
                     msg.role === "error" && "bg-destructive/10 text-destructive p-4 sm:p-5 border border-destructive/30 shadow-lg shadow-destructive/10",
                   )}
                   style={msg.role === "user" ? {
@@ -1048,7 +1048,7 @@ export default function ChatPage() {
                   } : undefined}
                 >
                   {msg.role === "assistant" ? (
-                    <div className="text-sm break-words overflow-hidden" style={{ fontFamily: 'var(--chat-font-family)', fontSize: 'var(--chat-font-size)', color: 'var(--chat-font-color)' }}>
+                    <div className="text-sm break-words overflow-hidden text-black" style={{ fontFamily: 'var(--chat-font-family)', fontSize: 'var(--chat-font-size)' }}>
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
