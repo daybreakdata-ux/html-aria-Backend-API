@@ -8,7 +8,8 @@ import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Menu, Send, Settings, Plus, X, Copy, RotateCw, Globe, Sparkles, Download, Mic, Paperclip, History, Zap, LogOut } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Menu, Send, Settings, Plus, X, Copy, RotateCw, Globe, Sparkles, Download, Mic, Paperclip, History, Zap, LogOut, MoreHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { PermissionsManager } from "@/components/permissions-manager"
@@ -1128,38 +1129,36 @@ export default function ChatPage() {
                   )}
 
                   {msg.role === "assistant" && (
-                    <div className="flex gap-1 mt-3 transition-opacity">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => copyMessage(msg.content)}
-                        className="h-7 px-2 text-xs"
-                        style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}
-                      >
-                        <Copy className="w-3 h-3 mr-1" />
-                        Copy
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => regenerateMessage(msg.id)}
-                        className="h-7 px-2 text-xs"
-                        style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}
-                      >
-                        <RotateCw className="w-3 h-3 mr-1" />
-                        Retry
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => downloadMessage(msg.content, msg.id)}
-                        className="h-7 px-2 text-xs"
-                        title={msg.downloadUrl ? "Download file" : "Generate and download file"}
-                        style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}
-                      >
-                        <Download className="w-3 h-3 mr-1" />
-                        Download
-                      </Button>
+                    <div className="flex justify-end mt-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0 opacity-60 hover:opacity-100"
+                            style={{ fontFamily: 'var(--system-font-family)', fontSize: 'var(--system-font-size)', color: 'var(--system-font-color)' }}
+                          >
+                            <MoreHorizontal className="w-3 h-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuItem onClick={() => copyMessage(msg.content)}>
+                            <Copy className="w-3 h-3 mr-2" />
+                            Copy
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => regenerateMessage(msg.id)}>
+                            <RotateCw className="w-3 h-3 mr-2" />
+                            Retry
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => downloadMessage(msg.content, msg.id)}
+                            title={msg.downloadUrl ? "Download file" : "Generate and download file"}
+                          >
+                            <Download className="w-3 h-3 mr-2" />
+                            Download
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   )}
                 </div>
