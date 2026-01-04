@@ -1306,7 +1306,7 @@ export default function ChatPage() {
                   className={cn(
                     "h-16 w-16 rounded-full text-white font-medium",
                     isRecording
-                      ? "bg-red-600 hover:bg-red-700 animate-pulse"
+                      ? "bg-accent hover:bg-accent/90 animate-pulse"
                       : "bg-accent hover:bg-accent/90"
                   )}
                   title={isRecording ? "Stop recording" : "Start voice input"}
@@ -1328,7 +1328,7 @@ export default function ChatPage() {
                   <Button
                     size="lg"
                     onClick={stopSpeaking}
-                    className="h-16 w-16 rounded-full bg-gray-600 hover:bg-gray-700 text-white"
+                    className="h-16 w-16 rounded-full bg-accent hover:bg-accent/90 text-white"
                     title="Stop speaking"
                   >
                     <div className="flex flex-col items-center">
@@ -1376,7 +1376,7 @@ export default function ChatPage() {
                 className={cn(
                   "h-11 w-11 sm:h-12 sm:w-12 p-0 flex-shrink-0 rounded-xl touch-manipulation",
                   isRecording
-                    ? "bg-red-600 hover:bg-red-700 animate-pulse text-white"
+                    ? "bg-accent hover:bg-accent/90 animate-pulse text-white"
                     : ""
                 )}
                 title={isRecording ? "Stop recording" : "Voice input"}
