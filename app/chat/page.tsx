@@ -994,18 +994,18 @@ export default function ChatPage() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="flex-shrink-0 h-14 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4">
+        <header className="flex-shrink-0 h-14 bg-gray-100 border-b border-gray-200 flex items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <Button
               size="sm"
               variant="ghost"
               onClick={() => setSidebarOpen(true)}
-              className="h-9 w-9 p-0 text-gray-300 hover:text-white hover:bg-gray-700"
+              className="h-9 w-9 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-200"
               title="Menu"
             >
               <Menu className="w-5 h-5" />
             </Button>
-            <h1 className="text-lg font-semibold text-white">ARIA</h1>
+            <h1 className="text-lg font-semibold text-gray-900">ARIA</h1>
           </div>
 
           <div className="flex items-center gap-2">
@@ -1013,7 +1013,7 @@ export default function ChatPage() {
               size="sm"
               variant="ghost"
               onClick={createNewChat}
-              className="h-9 w-9 p-0 text-gray-300 hover:text-white hover:bg-gray-700"
+              className="h-9 w-9 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-200"
               title="New Chat"
             >
               <Plus className="w-5 h-5" />
@@ -1240,7 +1240,7 @@ export default function ChatPage() {
         )}
 
         {/* Input Area */}
-        <div className="flex-shrink-0 px-4 py-4 border-t border-border/60 bg-gradient-to-b from-card/95 to-card/90 backdrop-blur-xl pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:pb-[env(safe-area-inset-bottom)] shadow-lg">
+        <div className="flex-shrink-0 px-4 py-4 border-t border-gray-200 bg-gray-100 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:pb-[env(safe-area-inset-bottom)] shadow-lg">
           <div className="mx-auto" style={{ maxWidth: 'var(--chat-width, 800px)' }}>
           {uploadedFile && (
             <div className="mb-3 p-3 bg-accent/10 border border-accent/20 rounded-xl flex items-center justify-between text-sm shadow-sm backdrop-blur-sm">
