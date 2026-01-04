@@ -1008,6 +1008,14 @@ export default function ChatPage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => document.getElementById('file-upload')?.click()}
+              className="h-9 w-9 rounded-lg border-2 border-dashed dark:border-white dark:text-white border-black text-black bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center justify-center"
+              title="Attach file"
+            >
+              <Paperclip className="w-4 h-4" />
+            </button>
+
             <Button
               size="sm"
               variant="ghost"
@@ -1336,34 +1344,10 @@ export default function ChatPage() {
           ) : (
             /* Text Chat Mode */
             <div className="relative">
-              {/* Floating Wireframe Buttons */}
-              <div className="absolute -top-16 left-0 flex gap-3">
-                <button
-                  onClick={() => document.getElementById('file-upload')?.click()}
-                  disabled={isLoading || (status === 'unauthenticated' && anonymousMessageCount >= 4)}
-                  className="w-12 h-12 rounded-full border-2 border-dashed dark:border-white dark:text-white border-black text-black bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center justify-center disabled:opacity-50"
-                  title="Attach file"
-                >
-                  <Paperclip className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                  disabled={isLoading || (status === 'unauthenticated' && anonymousMessageCount >= 4)}
-                  className={cn(
-                    "w-12 h-12 rounded-full border-2 border-dashed flex items-center justify-center transition-colors disabled:opacity-50",
-                    isRecording
-                      ? "border-red-500 text-red-500 bg-red-50 dark:bg-red-950/20 animate-pulse"
-                      : "dark:border-white dark:text-white dark:hover:bg-white/5 border-black text-black hover:bg-black/5"
-                  )}
-                  title={isRecording ? "Stop recording" : "Voice input"}
-                >
-                  <Mic className="w-5 h-5" />
-                </button>
-              </div>
 
               {/* Floating Input Container */}
-              <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl shadow-2xl p-1">
-                <div className="flex items-end gap-3 p-2">
+              <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl shadow-2xl p-1 max-w-2xl mx-auto">
+                <div className="flex items-end gap-2 p-2">
                   <Textarea
                     ref={textareaRef}
                     value={message}
@@ -1391,10 +1375,23 @@ export default function ChatPage() {
                       !message.trim() ||
                       (status === 'unauthenticated' && anonymousMessageCount >= 4)
                     }
-                    className="h-10 w-10 rounded-2xl p-0 flex-shrink-0 bg-accent hover:bg-accent/90 text-white shadow-lg"
+                    className="h-10 w-10 rounded-2xl p-0 flex-shrink-0 border-2 border-dashed dark:border-white dark:text-white dark:hover:bg-white/5 border-black text-black bg-transparent hover:bg-black/5 transition-colors"
                   >
                     <Send className="w-4 h-4" />
                   </Button>
+                  <button
+                    onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                    disabled={isLoading || (status === 'unauthenticated' && anonymousMessageCount >= 4)}
+                    className={cn(
+                      "h-10 w-10 rounded-2xl border-2 border-dashed flex items-center justify-center transition-colors disabled:opacity-50",
+                      isRecording
+                        ? "border-red-500 text-red-500 bg-red-50 dark:bg-red-950/20 animate-pulse"
+                        : "dark:border-white dark:text-white dark:hover:bg-white/5 border-black text-black bg-transparent hover:bg-black/5"
+                    )}
+                    title={isRecording ? "Stop recording" : "Voice input"}
+                  >
+                    <Mic className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
 
