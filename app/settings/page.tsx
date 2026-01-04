@@ -43,7 +43,6 @@ export default function SettingsPage() {
 
   // Advanced
   const [developerMode, setDeveloperMode] = useState(false)
-  const [debugLogging, setDebugLogging] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -71,7 +70,6 @@ export default function SettingsPage() {
     setDesktopNotifications(localStorage.getItem("aria_desktop_notifications") === "true")
 
     setDeveloperMode(localStorage.getItem("aria_developer_mode") === "true")
-    setDebugLogging(localStorage.getItem("aria_debug_logging") === "true")
   }, [mounted])
 
   const handleSave = () => {
@@ -94,7 +92,6 @@ export default function SettingsPage() {
     localStorage.setItem("aria_desktop_notifications", desktopNotifications.toString())
 
     localStorage.setItem("aria_developer_mode", developerMode.toString())
-    localStorage.setItem("aria_debug_logging", debugLogging.toString())
 
     // Apply theme changes immediately
     if (theme) {
@@ -120,7 +117,6 @@ export default function SettingsPage() {
       soundEnabled,
       desktopNotifications,
       developerMode,
-      debugLogging,
       theme
     }
 
@@ -159,7 +155,6 @@ export default function SettingsPage() {
           if (typeof settings.soundEnabled === 'boolean') setSoundEnabled(settings.soundEnabled)
           if (typeof settings.desktopNotifications === 'boolean') setDesktopNotifications(settings.desktopNotifications)
           if (typeof settings.developerMode === 'boolean') setDeveloperMode(settings.developerMode)
-          if (typeof settings.debugLogging === 'boolean') setDebugLogging(settings.debugLogging)
 
           alert("Settings imported successfully!")
         } catch (error) {
@@ -186,7 +181,6 @@ export default function SettingsPage() {
     setSoundEnabled(true)
     setDesktopNotifications(false)
     setDeveloperMode(false)
-    setDebugLogging(false)
 
     alert("Settings reset to defaults!")
   }
@@ -279,16 +273,10 @@ export default function SettingsPage() {
         <ThemeToggle />
       </div>
 
-      <Tabs value={activeCategory} onValueChange={setActiveCategory} className="h-full flex flex-col md:flex-row w-full">
-        {/* Top Tabs on Mobile, Left Sidebar on Desktop */}
-        <div className="md:w-64 md:border-r md:border-border md:bg-muted/30 md:flex md:flex-col border-b border-border md:border-b-0 bg-muted/30">
-          <div className="p-4 md:border-b md:border-border border-b-0">
-            <h1 className="text-lg font-semibold md:block hidden">Settings</h1>
-            <p className="text-sm text-muted-foreground md:block hidden">Configure your preferences</p>
-          </div>
-
-          {/* Mobile: Horizontal Tabs */}
-          <div className="md:hidden border-b border-border bg-muted/30">
+      <Tabs value={activeCategory} onValueChange={setActiveCategory} className="h-full flex flex-col w-full">
+        {/* Horizontal Tabs at Top */}
+        <div className="border-b border-border bg-muted/30">
+          <div className="max-w-6xl mx-auto">
             <TabsList className="grid w-full grid-cols-5 p-1">
               {categories.map((category) => {
                 const Icon = category.icon
@@ -305,30 +293,10 @@ export default function SettingsPage() {
               })}
             </TabsList>
           </div>
-
-          {/* Desktop: Vertical Sidebar Tabs */}
-          <TabsList className="hidden md:flex flex-col h-full p-2 gap-1 bg-transparent">
-            {categories.map((category) => {
-              const Icon = category.icon
-              return (
-                <TabsTrigger
-                  key={category.id}
-                  value={category.id}
-                  className="w-full justify-start gap-3 px-3 py-3 text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm"
-                >
-                  <Icon className="w-4 h-4" />
-                  <div className="text-left">
-                    <div className="font-medium">{category.label}</div>
-                    <div className="text-xs text-muted-foreground">{category.description}</div>
-                  </div>
-                </TabsTrigger>
-              )
-            })}
-          </TabsList>
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden min-h-0">
           <div className="h-full overflow-y-auto">
             <div className="max-w-4xl mx-auto p-4 md:p-6 pb-[env(safe-area-inset-bottom)]">
 
@@ -696,14 +664,6 @@ export default function SettingsPage() {
                           <p className="text-sm text-muted-foreground">Enable advanced debugging features</p>
                         </div>
                         <Switch checked={developerMode} onCheckedChange={setDeveloperMode} />
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label>Debug logging</Label>
-                          <p className="text-sm text-muted-foreground">Log detailed information for troubleshooting</p>
-                        </div>
-                        <Switch checked={debugLogging} onCheckedChange={setDebugLogging} />
                       </div>
                     </CardContent>
                   </Card>
