@@ -257,58 +257,84 @@ export default function SettingsPage() {
   ]
 
   return (
-    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-background flex overflow-hidden">
       {/* Floating Buttons */}
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={() => router.push("/chat")} 
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => router.push("/chat")}
         className="floating-button top-left h-10 w-10 sm:h-11 sm:w-11 p-0 shadow-lg"
         title="Back to Chat"
       >
         <ArrowLeft className="w-5 h-5" />
       </Button>
-      
-      <Button 
-        onClick={handleSave} 
-        className="floating-button top-right-2 px-4 h-10 sm:h-11 text-sm shadow-lg [&:not(:disabled):hover]:opacity-80" 
+
+      <Button
+        onClick={handleSave}
+        className="floating-button top-right-2 px-4 h-10 sm:h-11 text-sm shadow-lg [&:not(:disabled):hover]:opacity-80"
         style={{ backgroundColor: 'var(--accent-color)' }}
         title="Save Changes"
       >
         <Save className="w-4 h-4 sm:mr-2" />
         <span className="hidden sm:inline">Save</span>
       </Button>
-      
+
       <div className="floating-button top-right">
         <ThemeToggle />
       </div>
 
-      <div className="flex-1 overflow-hidden">
-        <Tabs value={activeCategory} onValueChange={setActiveCategory} className="h-full flex flex-col">
-          {/* Category Tabs */}
-          <div className="border-b border-border bg-muted/30">
-            <div className="max-w-6xl mx-auto">
-              <TabsList className="grid w-full grid-cols-4 p-1">
-                {categories.map((category) => {
-                  const Icon = category.icon
-                  return (
-                    <TabsTrigger
-                      key={category.id}
-                      value={category.id}
-                      className="flex flex-col items-center gap-1 py-3 px-2 text-xs data-[state=active]:bg-background"
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span className="font-medium">{category.label}</span>
-                    </TabsTrigger>
-                  )
-                })}
-              </TabsList>
-            </div>
+      <Tabs value={activeCategory} onValueChange={setActiveCategory} className="h-full flex flex-col md:flex-row w-full">
+        {/* Top Tabs on Mobile, Left Sidebar on Desktop */}
+        <div className="md:w-64 md:border-r md:border-border md:bg-muted/30 md:flex md:flex-col border-b border-border md:border-b-0 bg-muted/30">
+          <div className="p-4 md:border-b md:border-border border-b-0">
+            <h1 className="text-lg font-semibold md:block hidden">Settings</h1>
+            <p className="text-sm text-muted-foreground md:block hidden">Configure your preferences</p>
           </div>
 
-          {/* Tab Content */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="max-w-6xl mx-auto p-6 pb-[env(safe-area-inset-bottom)]">
+          {/* Mobile: Horizontal Tabs */}
+          <div className="md:hidden border-b border-border bg-muted/30">
+            <TabsList className="grid w-full grid-cols-4 p-1">
+              {categories.map((category) => {
+                const Icon = category.icon
+                return (
+                  <TabsTrigger
+                    key={category.id}
+                    value={category.id}
+                    className="flex flex-col items-center gap-1 py-3 px-2 text-xs data-[state=active]:bg-background"
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="font-medium">{category.label}</span>
+                  </TabsTrigger>
+                )
+              })}
+            </TabsList>
+          </div>
+
+          {/* Desktop: Vertical Sidebar Tabs */}
+          <TabsList className="hidden md:flex flex-col h-full p-2 gap-1 bg-transparent">
+            {categories.map((category) => {
+              const Icon = category.icon
+              return (
+                <TabsTrigger
+                  key={category.id}
+                  value={category.id}
+                  className="w-full justify-start gap-3 px-3 py-3 text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
+                  <Icon className="w-4 h-4" />
+                  <div className="text-left">
+                    <div className="font-medium">{category.label}</div>
+                    <div className="text-xs text-muted-foreground">{category.description}</div>
+                  </div>
+                </TabsTrigger>
+              )
+            })}
+          </TabsList>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto">
+            <div className="max-w-4xl mx-auto p-4 md:p-6 pb-[env(safe-area-inset-bottom)]">
 
               {/* Appearance Tab */}
               <TabsContent value="appearance" className="space-y-8 mt-0">
@@ -738,8 +764,8 @@ export default function SettingsPage() {
               </TabsContent>
             </div>
           </div>
-        </Tabs>
-      </div>
+        </div>
+      </Tabs>
     </div>
   )
 }
