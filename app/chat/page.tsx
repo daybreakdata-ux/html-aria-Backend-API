@@ -989,30 +989,37 @@ export default function ChatPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Floating Buttons */}
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => setSidebarOpen(true)}
-          className="floating-button top-left h-10 w-10 sm:h-11 sm:w-11 p-0 hover:bg-accent/10 shadow-lg"
-          title="Menu"
-        >
-          <Menu className="w-5 h-5" />
-        </Button>
-        
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={createNewChat}
-          className="floating-button top-right-2 h-10 w-10 sm:h-11 sm:w-11 p-0 hover:bg-accent/10 shadow-lg"
-          title="New Chat"
-        >
-          <Plus className="w-5 h-5" />
-        </Button>
-        
-        <div className="floating-button top-right">
-          <ThemeToggle />
-        </div>
+        {/* Header */}
+        <header className="flex-shrink-0 h-14 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4">
+          <div className="flex items-center gap-3">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setSidebarOpen(true)}
+              className="h-9 w-9 p-0 text-gray-300 hover:text-white hover:bg-gray-700"
+              title="Menu"
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
+            <h1 className="text-lg font-semibold text-white">ARIA</h1>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={createNewChat}
+              className="h-9 w-9 p-0 text-gray-300 hover:text-white hover:bg-gray-700"
+              title="New Chat"
+            >
+              <Plus className="w-5 h-5" />
+            </Button>
+
+            <div className="h-9 w-9 flex items-center justify-center">
+              <ThemeToggle />
+            </div>
+          </div>
+        </header>
 
         {/* Scrollable Messages Area */}
         <ScrollArea className="flex-1 overflow-y-auto">
