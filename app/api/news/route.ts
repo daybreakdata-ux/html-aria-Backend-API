@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server"
 
+// Force dynamic rendering for Vercel
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const category = searchParams.get("category") || "general"
@@ -57,6 +61,8 @@ export async function GET(request: Request) {
         headers: {
           "User-Agent": "Aria-Home/1.0",
         },
+        cache: 'no-store',
+        next: { revalidate: 0 }
       }
     )
 
