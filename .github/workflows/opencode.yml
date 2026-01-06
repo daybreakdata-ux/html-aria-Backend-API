@@ -22,6 +22,6 @@ jobs:
       - name: Run OpenCode
         uses: anomalyco/opencode/github@latest
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENROUTER_API_KEY: ${{ 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 }}
         with:
-          model: anthropic/claude-sonnet-4-20250514
+          model: mistralai/devstral-2512:free
