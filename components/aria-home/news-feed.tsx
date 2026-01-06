@@ -80,7 +80,7 @@ export function NewsFeed() {
           title: item.title || "No title",
           excerpt: item.snippet || item.description || "",
           imageUrl: item.thumbnail || item.image || "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800",
-          source: item.source || item.publisher || "Unknown",
+          source: typeof item.source === 'string' ? item.source : (item.source?.name || item.publisher || "Unknown"),
           publishedAt: item.date || new Date().toISOString(),
           url: item.link || item.url || "#",
         }))
