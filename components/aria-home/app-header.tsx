@@ -5,9 +5,14 @@ import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { usePathname } from "next/navigation"
 
 export function AppHeader() {
   const [isDark, setIsDark] = useState(false)
+  const pathname = usePathname()
+  
+  // Check if we're on the home page
+  const isHomePage = pathname === '/'
 
   useEffect(() => {
     // Check initial theme
@@ -31,7 +36,7 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto max-w-2xl flex h-14 items-center justify-between px-4">
-        <Link href="/">
+        <Link href="/" className="cursor-pointer hover:opacity-80 transition-opacity">
           <Image 
             src="/logo.svg" 
             alt="ARIA" 
@@ -47,7 +52,7 @@ export function AppHeader() {
             {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
 
-          <Link href="/settings">
+          <Link href={isHomePage ? "/home/settings" : "/settings"}>
             <Button variant="ghost" size="icon" aria-label="Settings">
               <Settings className="h-5 w-5" />
             </Button>

@@ -196,10 +196,6 @@ export function NewsFeed() {
             {isEditMode ? <Check className="h-4 w-4 mr-1" /> : <Edit3 className="h-4 w-4 mr-1" />}
             {isEditMode ? "Done" : "Edit"}
           </Button>
-          <Button variant="outline" size="sm" onClick={handleAddWidget}>
-            <Plus className="h-4 w-4 mr-1" />
-            Add
-          </Button>
         </div>
       </div>
 
