@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -1004,7 +1005,14 @@ export default function ChatPage() {
             >
               <Menu className="w-5 h-5" />
             </Button>
-            <h1 className="text-lg font-semibold dark:text-white text-black">ARIA</h1>
+            <Image 
+              src="/logo.svg" 
+              alt="ARIA" 
+              width={100} 
+              height={28}
+              className="h-7 w-auto dark:invert"
+              priority
+            />
           </div>
 
           <div className="flex items-center gap-2">

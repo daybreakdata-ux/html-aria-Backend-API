@@ -4,6 +4,11 @@ System prompts and models for each mode are now configured via Vercel environmen
 
 ## Required Environment Variables
 
+### Core API Keys
+- `OPENROUTER_API_KEY` - API key for OpenRouter (used for AI-powered search and chat) - Get from [openrouter.ai/keys](https://openrouter.ai/keys)
+- `SERPER_API_KEY` - API key for Serper web search API - Get from [serper.dev](https://serper.dev/)
+- `NEWS_API_KEY` - API key for News API (used for news feed) - Get from [newsapi.org](https://newsapi.org/)
+
 ### Default Mode
 - `MODE_DEFAULT_SYSTEM_PROMPT` - System prompt for default mode
 - `MODE_DEFAULT_MODEL` - Model to use for default mode (default: `cognitivecomputations/dolphin-mistral-24b-venice-edition:free`)

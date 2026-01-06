@@ -45,7 +45,7 @@ export default function SignUpPage() {
         return
       }
 
-      setSuccess('Account created successfully! You can now sign in.')
+      setSuccess('Account created successfully! Redirecting to sign in...')
       setTimeout(() => {
         router.push('/auth/signin')
       }, 2000)
@@ -58,7 +58,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>

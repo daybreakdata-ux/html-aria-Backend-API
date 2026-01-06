@@ -12,7 +12,9 @@
 - **NEXTAUTH_SECRET**: A secure random string (generate with: `openssl rand -base64 32`)
 - **NEXTAUTH_URL**: Your Vercel deployment URL (usually auto-set, format: `https://your-app.vercel.app`)
 - **BLOB_READ_WRITE_TOKEN**: Get from [Vercel Blob Store](https://vercel.com/dashboard/stores)
-- **OPENROUTER_API_KEY**: OpenRouter API key (server-side only, not user-configurable)
+- **OPENROUTER_API_KEY**: OpenRouter API key for AI-powered search - Get from [openrouter.ai/keys](https://openrouter.ai/keys)
+- **SERPER_API_KEY**: Serper API key for web search - Get from [serper.dev](https://serper.dev/)
+- **NEWS_API_KEY**: News API key for news feed - Get from [newsapi.org](https://newsapi.org/)
 
 ### Mode Configuration Variables
 

@@ -33,9 +33,9 @@ export default function SignInPage() {
       if (result?.error) {
         setError('Invalid email or password')
       } else {
-        // Refresh session and redirect
+        // Refresh session and redirect to homepage
         await getSession()
-        router.push('/chat')
+        router.push('/')
       }
     } catch (error) {
       setError('An error occurred. Please try again.')
@@ -45,7 +45,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
