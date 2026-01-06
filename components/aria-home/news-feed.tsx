@@ -51,19 +51,69 @@ export function NewsFeed() {
       const category = parsedPreferences.newsCategory || "general"
       const location = parsedPreferences.location || ""
 
-      const response = await fetch(`/api/news?category=${category}&location=${encodeURIComponent(location)}`)
+      console.log("Fetching news with params:", { category, location })
+      
+      // Use search endpoint with google_news engine
+      const searchQuery = category === "general" ? "latest news" : `${category} news`
+      const url = `/api/search?engine=google_news&q=${encodeURIComponent(searchQuery)}${location ? `&location=${encodeURIComponent(location)}` : ''}`
+      
+      console.log("Fetching from:", url)
+      
+      const response = await fetch(url)
+      
+      console.log("Search API response status:", response.status)
+      
+      if (!response.ok) {
+        throw new Error(`API responded with status: ${response.status}`)
+      }
+      
       const data = await response.json()
-      setArticles(data.articles || [])
-
-      if (parsedPreferences.enableOfflineMode) {
-        localStorage.setItem("cachedArticles", JSON.stringify(data.articles))
+      
+      console.log("Search API data:", data)
+      
+      // Transform search results to articles format
+      let transformedArticles: NewsArticle[] = []
+      
+      if (data.news_results && Array.isArray(data.news_results)) {
+        transformedArticles = data.news_results.slice(0, 6).map((item: any, index: number) => ({
+          id: `news-${Date.now()}-${index}`,
+          title: item.title || "No title",
+          excerpt: item.snippet || item.description || "",
+          imageUrl: item.thumbnail || item.image || "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800",
+          source: item.source || item.publisher || "Unknown",
+          publishedAt: item.date || new Date().toISOString(),
+          url: item.link || item.url || "#",
+        }))
+      }
+      
+      console.log("Transformed articles count:", transformedArticles.length)
+      
+      if (transformedArticles.length > 0) {
+        setArticles(transformedArticles)
+        if (parsedPreferences.enableOfflineMode) {
+          localStorage.setItem("cachedArticles", JSON.stringify(transformedArticles))
+        }
+      } else {
+        console.warn("No articles in response, trying cached")
+        const cached = localStorage.getItem("cachedArticles")
+        if (cached) {
+          const cachedArticles = JSON.parse(cached)
+          console.log("Using cached articles:", cachedArticles.length)
+          setArticles(cachedArticles)
+        } else {
+          console.warn("No cached articles available")
+        }
       }
     } catch (error) {
       console.error("Failed to fetch news:", error)
 
       const cached = localStorage.getItem("cachedArticles")
       if (cached) {
-        setArticles(JSON.parse(cached))
+        const cachedArticles = JSON.parse(cached)
+        console.log("Using cached articles after error:", cachedArticles.length)
+        setArticles(cachedArticles)
+      } else {
+        console.error("No cached articles available after error")
       }
     } finally {
       setIsLoading(false)

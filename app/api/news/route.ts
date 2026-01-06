@@ -9,6 +9,8 @@ export async function GET(request: Request) {
   const category = searchParams.get("category") || "general"
   const location = searchParams.get("location") || ""
 
+  console.log("News API called with:", { category, location })
+
   const apiKey = process.env.NEWS_API_KEY
 
   if (!apiKey) {
@@ -21,6 +23,8 @@ export async function GET(request: Request) {
       { status: 200 }
     )
   }
+
+  console.log("NewsAPI key is present:", apiKey.substring(0, 8) + "...")
 
   try {
     // Determine country code from location (defaulting to US)
@@ -66,11 +70,21 @@ export async function GET(request: Request) {
       }
     )
 
+    console.log("NewsAPI response status:", response.status)
+
     if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`NewsAPI error: ${response.status} ${response.statusText}`, errorText)
       throw new Error(`NewsAPI error: ${response.status} ${response.statusText}`)
     }
 
     const data = await response.json()
+
+    console.log("NewsAPI returned:", {
+      status: data.status,
+      totalResults: data.totalResults,
+      articlesCount: data.articles?.length || 0
+    })
 
     // Transform NewsAPI response to our format, limit to 6 articles
     const articles = data.articles?.slice(0, 6).map((article: any, index: number) => ({
@@ -82,6 +96,8 @@ export async function GET(request: Request) {
       publishedAt: article.publishedAt,
       url: article.url,
     })) || []
+
+    console.log("Returning articles count:", articles.length)
 
     return NextResponse.json({ articles })
   } catch (error) {

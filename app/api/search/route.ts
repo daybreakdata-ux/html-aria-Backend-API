@@ -56,6 +56,83 @@ interface SerpAPIResponse {
   }
 }
 
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const engine = searchParams.get("engine")
+    const query = searchParams.get("q")
+    const location = searchParams.get("location")
+
+    // Handle google_news engine for news feed
+    if (engine === "google_news") {
+      const serpApiKey = process.env.SERPAPI_API_KEY
+
+      if (!serpApiKey) {
+        console.error("[Search API] SERPAPI_API_KEY is not configured")
+        return Response.json(
+          { news_results: [], error: "News search service is not configured" },
+          { status: 200 }
+        )
+      }
+
+      try {
+        const serpApiUrl = new URL("https://serpapi.com/search")
+        serpApiUrl.searchParams.append("engine", "google_news")
+        serpApiUrl.searchParams.append("q", query || "latest news")
+        serpApiUrl.searchParams.append("api_key", serpApiKey)
+        if (location) {
+          serpApiUrl.searchParams.append("gl", "us") // Can be enhanced to map location to country code
+        }
+
+        console.log("[Search API] Fetching Google News:", serpApiUrl.toString().replace(serpApiKey, "***"))
+
+        const serpApiResponse = await fetch(serpApiUrl.toString(), {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          cache: 'no-store',
+        })
+
+        if (!serpApiResponse.ok) {
+          const errorText = await serpApiResponse.text().catch(() => 'Unknown error')
+          console.error(`[Search API] SerpAPI error ${serpApiResponse.status}:`, errorText)
+          throw new Error(`SerpAPI error: ${serpApiResponse.status}`)
+        }
+
+        const data = await serpApiResponse.json()
+        
+        console.log("[Search API] Google News results count:", data.news_results?.length || 0)
+
+        return Response.json(data, {
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Content-Type': 'application/json',
+          },
+        })
+      } catch (error: any) {
+        console.error("[Search API] News search error:", error)
+        return Response.json(
+          { news_results: [], error: "Failed to fetch news" },
+          { status: 200 }
+        )
+      }
+    }
+
+    // For other GET requests, return method not allowed
+    return Response.json(
+      { error: "Use POST method for search queries or GET with engine=google_news for news" },
+      { status: 405 }
+    )
+  } catch (error: any) {
+    console.error("[Search API] GET error:", error)
+    return Response.json(
+      { error: "An error occurred" },
+      { status: 500 }
+    )
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()
