@@ -15,9 +15,16 @@ export function AppHeader() {
   const isHomePage = pathname === '/'
 
   useEffect(() => {
-    // Check initial theme
-    const isDarkMode = document.documentElement.classList.contains("dark")
+    // Check initial theme or default to dark
+    const savedTheme = localStorage.getItem("theme")
+    const isDarkMode = savedTheme === "dark" || (!savedTheme && !document.documentElement.classList.contains("light"))
     setIsDark(isDarkMode)
+    
+    // Apply dark mode by default if no theme is saved
+    if (!savedTheme) {
+      document.documentElement.classList.add("dark")
+      localStorage.setItem("theme", "dark")
+    }
   }, [])
 
   const toggleTheme = () => {
