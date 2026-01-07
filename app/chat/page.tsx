@@ -430,8 +430,7 @@ export default function ChatPage() {
         setIsRecording(false)
         // In voice chat mode, automatically send the message after recording
         if (selectedMode === "voice" && finalTranscript.trim()) {
-          setMessage(finalTranscript) // Ensure the message is set
-          setTimeout(() => sendMessage(), 100) // Smaller delay
+          sendMessage(finalTranscript) // Send directly without waiting for state update
         }
       }
 
@@ -447,6 +446,18 @@ export default function ChatPage() {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop()
       setIsRecording(false)
+    }
+  }
+
+  const handleMicrophoneClick = async () => {
+    if (isRecording) {
+      stopVoiceRecording()
+    } else {
+      // Switch to voice chat mode automatically
+      setSelectedMode("voice")
+      localStorage.setItem("aria_selected_mode", "voice")
+      // Start recording after a brief delay to allow mode switch
+      setTimeout(() => startVoiceRecording(), 100)
     }
   }
 
@@ -504,8 +515,9 @@ export default function ChatPage() {
     }
   }
 
-  const sendMessage = async () => {
-    if (!message.trim() || isLoading || !activeChat) return
+  const sendMessage = async (textToSend?: string) => {
+    const messageText = textToSend || message
+    if (!messageText.trim() || isLoading || !activeChat) return
 
     // Check anonymous message limit
     if (status === 'unauthenticated') {
@@ -515,7 +527,7 @@ export default function ChatPage() {
       }
     }
 
-    const currentMessage = message.trim()
+    const currentMessage = messageText.trim()
     setMessage("")
 
     // Include file content if uploaded
@@ -1391,7 +1403,7 @@ export default function ChatPage() {
 
               {/* Mic Button Outside */}
               <button
-                onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                onClick={handleMicrophoneClick}
                 disabled={isLoading || (status === 'unauthenticated' && anonymousMessageCount >= 4)}
                 className={cn(
                   "h-12 w-12 rounded-full border-2 border-dashed flex items-center justify-center transition-colors disabled:opacity-50 flex-shrink-0",
